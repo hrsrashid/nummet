@@ -1,4 +1,4 @@
-# Numerical methods
+# Numerical methods [![Build Status](https://travis-ci.org/hrsrashid/nummet.svg?branch=master)](https://travis-ci.org/hrsrashid/nummet)
 My implementation of tasks from numerical methods class
 
 ## Task 0
