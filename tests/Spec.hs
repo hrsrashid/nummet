@@ -68,6 +68,14 @@ main = hspec $ do
       compute [[10, 20, 0.5, 12], [9, 2, 1, 9], [10, 40, 1, 19]]
         `shouldBe` [0.5, 0.25, 4]
 
+    it "solve with a11 = 0 (permutations required)" $
+      compute [[0, 5, 1, 10], [0.1, 3, 1, 9], [0.5, -5, 2, 10]]
+        `shouldBe` [10, 1, 5]
+
+    it "solve with permutations required" $
+      compute [[2, 2, 4, 12], [3, 4, 2, 18], [1, 1, 1, 5.5]]
+        `shouldBe` [3, 2, 0.5]
+
 
 toEither :: Result a -> Either String a
 toEither (Success a) = Right a
