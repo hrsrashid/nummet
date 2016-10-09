@@ -2,7 +2,6 @@ module Main where
 
 import System.Environment (getArgs)
 import Control.Exception
-import Text.Trifecta
 
 import Parser
 import Stringify
@@ -13,14 +12,14 @@ main = do
   args <- getArgs
   case args of
     [input, output] -> do
-      inputData <- parseFromFileEx (parseInput parseMatrix) input
+      inputData <- parseFile (parseInput parseMatrix) input
 
       case inputData of
-        Failure e -> do
+        Left e -> do
           putStrLn $ show e
           putStrLn "Failed."
 
-        Success parsedData -> do
+        Right parsedData -> do
           let result = stringify $ compute parsedData
           writeFile output result
             `catch` \(SomeException _) -> putStrLn result

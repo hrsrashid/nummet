@@ -7,4 +7,7 @@ System of linear algebraic equations - Regular Gaussian eliminaton
 ## Task 1
 System of linear algebraic equations - Gaussian elimination with selection of pivots from whole matrix
 
+## TODO: Task 2
+Function approximation. Newton bivariate polynomial interpolation.
+
 ## TODO: Task ..

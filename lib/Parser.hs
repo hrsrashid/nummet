@@ -1,10 +1,17 @@
 module Parser where
 
+import Control.Monad.IO.Class
 import Text.Trifecta
 import Data.Number.CReal
 import Data.Vector
 import Data.Matrix.Dense.Generic
 import qualified Data.Scientific as Sci
+
+parseFile :: MonadIO m => Parser a -> String -> m (Either ErrInfo a)
+parseFile p s = toEither <$> parseFromFileEx p s
+  where
+    toEither (Success a) = Right a
+    toEither (Failure a) = Left a
 
 parseInput :: Parser a -> Parser a
 parseInput p = do
