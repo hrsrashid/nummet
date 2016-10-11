@@ -1,7 +1,9 @@
 module Parser where
 
 import Control.Monad.IO.Class
+import Control.Applicative
 import Text.Trifecta
+import qualified Data.List as L
 import Data.Number.CReal
 import Data.Vector
 import Data.Matrix.Dense.Generic
@@ -14,13 +16,10 @@ parseFile p s = toEither <$> parseFromFileEx p s
     toEither (Failure a) = Left a
 
 parseInput :: Parser a -> Parser a
-parseInput p = do
-  skipComments
-  whiteSpace
-  result <- p
-  whiteSpace
-  skipComments
-  return result
+parseInput p = skipJunk *> p
+
+skipJunk :: Parser ()
+skipJunk = skipMany $ many space <|> comments
 
 eol :: String
 eol = "\n\r"
@@ -28,14 +27,12 @@ eol = "\n\r"
 space' :: String
 space' = " \t"
 
-skipEOL :: Parser ()
-skipEOL = skipMany $ oneOf eol
-
-skipComments :: Parser ()
-skipComments = skipMany $ do
-  _ <- char '#'
-  skipMany (noneOf eol)
-  skipEOL
+comments :: Parser String
+comments = fmap L.concat $ many $ do
+  skipSome (char '#')
+  result <- many (noneOf eol)
+  skipMany (oneOf eol)
+  return result
 
 parseDecimal :: Parser CReal
 parseDecimal = fmap (either fromInteger Sci.toRealFloat) $ runUnspaced $ do

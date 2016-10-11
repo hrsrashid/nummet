@@ -1,12 +1,9 @@
 module SlaeGauss where
 
-import Data.Number.CReal
-import qualified Data.Vector as Vec
-import qualified Data.Matrix as Mx
-
-type Matrix = Mx.Matrix CReal
-type Vector = Vec.Vector CReal
-type Permutations = Vec.Vector Int
+import qualified Data.Matrix       as Mx
+import           Data.Number.CReal
+import qualified Data.Vector       as Vec
+import           Library
 
 
 compute :: Matrix -> Vector
@@ -35,7 +32,7 @@ triangulate mx = (Mx.fromRows mx', permutations')
         updRow bs =
           let
             k = bs Vec.! j / as' Vec.! j
-            op = \a b -> b - a*k
+            op a b = b - a * k
           in Vec.zipWith op as' bs
 
 

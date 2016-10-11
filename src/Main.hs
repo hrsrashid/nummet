@@ -1,11 +1,11 @@
 module Main where
 
-import System.Environment (getArgs)
-import Control.Exception
+import           Control.Exception
+import           System.Environment (getArgs)
 
-import Parser
-import Stringify
-import SlaeGauss
+import           Parser
+import           SlaeGauss
+import           Stringify
 
 main :: IO ()
 main = do
@@ -16,7 +16,7 @@ main = do
 
       case inputData of
         Left e -> do
-          putStrLn $ show e
+          print e
           putStrLn "Failed."
 
         Right parsedData -> do
