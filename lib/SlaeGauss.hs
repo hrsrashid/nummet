@@ -29,7 +29,7 @@ triangulate mx = (Mx.fromRows mx', permutations')
       | otherwise = (as':ass'', ps'')
       where
         isLastCol = j + 2 >= Vec.length as
-        (as':ass', ps') = permuteIfZero j ps m
+        (as':ass', ps') = permuteToMax j ps m
         (ass'', ps'') = go (j + 1) ps' (map updRow ass')
 
         updRow bs =
@@ -39,30 +39,18 @@ triangulate mx = (Mx.fromRows mx', permutations')
           in Vec.zipWith op as' bs
 
 
-permuteIfZero :: Int -> Permutations -> [Vector] -> ([Vector], Permutations)
-permuteIfZero j ps m = if nearZero (as Vec.! j) then goCols (j + 1) j ps m else res
+permuteToMax :: Int -> Permutations -> [Vector] -> ([Vector], Permutations)
+permuteToMax col ps m =
+  ( Mx.toRows $ permuteRows 0 i $ permuteCols col j $ Mx.fromRows m
+  , swapComponents col j ps
+  )
   where
-    res@(as:_, _) = goRows 1 j ps m
-    err = error "Can't permute elements of empty matrix"
+    (i, j, _) = foldr imax (0, col, 0) $ zip [0..] m
 
-    goRows _ _ _ [] = err
-    goRows i j ps m@(as:_)
-      | isLastRow = (m, ps)
-      | nearZero (as Vec.! j) = goRows (i + 1) j ps permuted
-      | otherwise = (m, ps)
-      where
-        isLastRow = i + 2 >= Vec.length as
-        permuted = Mx.toRows $ permuteRows 0 i $ Mx.fromRows m
+    imax (i, v) oldMax@(_, _, max) = if rowMax > max then (i, j, rowMax) else oldMax
+      where (j, rowMax) = Vec.ifoldl vimax (0, 0) (Vec.drop col $ Vec.init v)
 
-    goCols _ _ _ [] = err
-    goCols i j ps m@(as:_)
-      | isLastCol = (m, ps)
-      | nearZero (as Vec.! j) = goCols (i + 1) j ps' permuted
-      | otherwise = (m, ps)
-      where
-        isLastCol = i + 2 >= Vec.length as
-        permuted = Mx.toRows $ permuteCols j i $ Mx.fromRows m
-        ps' = swapComponents j i ps
+    vimax (i, max) k a = if a > max then (k, a) else (i, max)
 
 
 permuteRows :: Int -> Int -> Matrix -> Matrix
