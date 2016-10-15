@@ -50,6 +50,34 @@ main = hspec $ do
   describe "SlaeGauss" $ do
     let compute = Vec.toList . SlaeGauss.compute . Mx.fromLists
 
+    it "permute max element to (0, 0)" $
+      SlaeGauss.permuteToMax 0 (Vec.fromList [0..2])
+        [ Vec.fromList [1, 2, 3, 10]
+        , Vec.fromList [4, 5, 6, 10]
+        , Vec.fromList [7, 8, 9, 10]
+        ]
+      `shouldBe`
+        ( [ Vec.fromList [9, 8, 7, 10]
+          , Vec.fromList [6, 5, 4, 10]
+          , Vec.fromList [3, 2, 1, 10]
+          ]
+        , Vec.fromList [2, 1, 0]
+        )
+
+    it "permute max element to (0, 1)" $
+      SlaeGauss.permuteToMax 1 (Vec.fromList [0..2])
+        [ Vec.fromList [1, 2, 3, 10]
+        , Vec.fromList [4, 5, 6, 10]
+        , Vec.fromList [7, 8, 9, 10]
+        ]
+      `shouldBe`
+        ( [ Vec.fromList [7, 9, 8, 10]
+          , Vec.fromList [4, 6, 5, 10]
+          , Vec.fromList [1, 3, 2, 10]
+          ]
+        , Vec.fromList [0, 2, 1]
+        )
+
     it "solve simple 2x2" $
       compute [[4, 5, 14], [99, 3, 105]] `shouldBe` [1, 2]
 

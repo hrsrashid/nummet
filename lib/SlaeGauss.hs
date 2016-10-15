@@ -45,12 +45,18 @@ permuteToMax col ps m =
   , swapComponents col j ps
   )
   where
-    (i, j, _) = foldr imax (0, col, 0) $ zip [0..] m
+    (i, j, _) = foldr imax (0, 0, 0) $ zip [0..] m
 
-    imax (i, v) oldMax@(_, _, max) = if rowMax > max then (i, j, rowMax) else oldMax
-      where (j, rowMax) = Vec.ifoldl vimax (0, 0) (Vec.drop col $ Vec.init v)
+    imax :: (Int, Vec.Vector CReal) -> (Int, Int, CReal) -> (Int, Int, CReal)
+    imax (i, v) oldMax@(_, _, max)
+        | rowMax > max = (i, j + col, rowMax)
+        | otherwise = oldMax
+        where (j, rowMax) = Vec.ifoldl vimax (0, 0) (Vec.drop col $ Vec.init v)
 
-    vimax (i, max) k a = if a > max then (k, a) else (i, max)
+    vimax :: (Int, CReal) -> Int -> CReal -> (Int, CReal)
+    vimax (i, max) k a
+        | a > max = (k, a)
+        | otherwise = (i, max)
 
 
 permuteRows :: Int -> Int -> Matrix -> Matrix
