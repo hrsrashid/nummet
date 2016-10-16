@@ -1,13 +1,13 @@
 module Parser where
 
-import Control.Monad.IO.Class
-import Control.Applicative
-import Text.Trifecta
-import qualified Data.List as L
-import Data.Number.CReal
-import Data.Vector
-import Data.Matrix.Dense.Generic
-import qualified Data.Scientific as Sci
+import           Control.Applicative
+import           Control.Monad.IO.Class
+import qualified Data.List                 as L
+import           Data.Matrix.Dense.Generic
+import           Data.Number.CReal
+import qualified Data.Scientific           as Sci
+import           Data.Vector
+import           Text.Trifecta
 
 parseFile :: MonadIO m => Parser a -> String -> m (Either ErrInfo a)
 parseFile p s = toEither <$> parseFromFileEx p s
@@ -19,7 +19,7 @@ parseInput :: Parser a -> Parser a
 parseInput p = skipJunk *> p
 
 skipJunk :: Parser ()
-skipJunk = skipMany $ many space <|> comments
+skipJunk = skipMany $ some space <|> comment
 
 eol :: String
 eol = "\n\r"
@@ -27,12 +27,10 @@ eol = "\n\r"
 space' :: String
 space' = " \t"
 
-comments :: Parser String
-comments = fmap L.concat $ many $ do
-  skipSome (char '#')
-  result <- many (noneOf eol)
-  skipMany (oneOf eol)
-  return result
+comment :: Parser String
+comment = do
+  _ <- char '#'
+  some (noneOf eol)
 
 parseDecimal :: Parser CReal
 parseDecimal = fmap (either fromInteger Sci.toRealFloat) $ runUnspaced $ do

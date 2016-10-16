@@ -14,20 +14,30 @@ toEither (Failure e) = Left $ show e
 suite :: SpecWith ()
 suite = do
   describe "Ignore junk" $ do
-    let parse = toEither . parseString (parseInput $ some letter) mempty
+    let parse p = toEither . parseString (parseInput p) mempty
+    let value = some letter
+    let twoValues = do
+          v1 <- value
+          skipJunk
+          v2 <- value
+          return (v1, v2)
 
     it "none" $
-      parse "value" `shouldBe` Right "value"
+      parse value "value" `shouldBe` Right "value"
 
     it "before" $
-      parse "# junk\n\n\n# junk2\n\nvalue" `shouldBe` Right "value"
+      parse value "# junk\n\n\n# junk2\n\nvalue" `shouldBe` Right "value"
 
     it "after" $
-      parse "value\n\n#junk\n\n#junk2\n\n" `shouldBe` Right "value"
+      parse value "value\n\n#junk\n\n#junk2\n\n" `shouldBe` Right "value"
 
     it "around" $
-      parse "# junk\n\n\n# junk2\n\nvalue\n\n#junk\n\n#junk2\n\n"
+      parse value "# junk\n\n\n# junk2\n\nvalue\n\n#junk\n\n#junk2\n\n"
         `shouldBe` Right "value"
+
+    it "between" $
+      parse twoValues "value\n\n#junk\n\n#junk2\n\nvalued"
+        `shouldBe` Right ("value", "valued")
 
   describe "Parsing decimal" $ do
     let parse = toEither . parseString parseDecimal mempty

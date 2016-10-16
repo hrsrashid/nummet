@@ -12,4 +12,4 @@ main = hspec $ do
   PS.suite
   SS.suite
   SGS.suite
-  BINS.suite
+  -- BINS.suite
