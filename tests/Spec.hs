@@ -67,13 +67,13 @@ main = hspec $ do
     it "permute max element to (0, 1)" $
       SlaeGauss.permuteToMax 1 (Vec.fromList [0..2])
         [ Vec.fromList [1, 2, 3, 10]
-        , Vec.fromList [4, 5, 6, 10]
-        , Vec.fromList [7, 8, 9, 10]
+        , Vec.fromList [9, 4, 8, 10]
+        , Vec.fromList [7, 6, 5, 10]
         ]
       `shouldBe`
-        ( [ Vec.fromList [7, 9, 8, 10]
-          , Vec.fromList [4, 6, 5, 10]
+        ( [ Vec.fromList [9, 8, 4, 10]
           , Vec.fromList [1, 3, 2, 10]
+          , Vec.fromList [7, 5, 6, 10]
           ]
         , Vec.fromList [0, 2, 1]
         )
@@ -89,20 +89,16 @@ main = hspec $ do
       compute [[1, 1, 1.6], [1, 2, 3.1]] `shouldBe` [0.1, 1.5]
 
     it "solve 3x3 x2" $
-      compute [[1, 2, 3, 32.6], [10, 2, 1, 12.5], [2.5, 3, 1, 12.25]]
-        `shouldBe` [0.1, 0.5, 10.5]
-
-    it "solve 3x3 x3" $
       compute [[10, 20, 0.5, 12], [9, 2, 1, 9], [10, 40, 1, 19]]
         `shouldBe` [0.5, 0.25, 4]
 
     it "solve with a11 = 0 (permutations required)" $
-      compute [[0, 5, 1, 10], [0.1, 3, 1, 9], [0.5, -5, 2, 10]]
-        `shouldBe` [10, 1, 5]
-
-    it "solve with permutations required" $
-      compute [[2, 2, 4, 12], [3, 4, 2, 18], [1, 1, 1, 5.5]]
-        `shouldBe` [3, 2, 0.5]
+      compute
+        [ [0, 2, 1, 11]
+        , [1, 3, 2, 20]
+        , [5, -2, 1, 4]
+        ]
+        `shouldBe` [1, 3, 5]
 
 
 toEither :: Result a -> Either String a
