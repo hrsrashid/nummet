@@ -5,23 +5,65 @@ import           Data.Number.CReal
 import qualified Data.Vector       as Vec
 import           Library
 
-
+-- z = f(x, y)
+-- h₁ = 𝚫x = const, h₂ = 𝚫y = const
+-- 𝚫ₓzᵢⱼ = z_(i+1, j) - zᵢⱼ
+-- 𝚫ᵧzᵢⱼ = z_(i, j+1) - zᵢⱼ
+-- 𝚫²ₓₓzᵢⱼ = z_(i+2, j) - 2z_(i+1, j) + zᵢⱼ
+-- 𝚫²ᵧᵧzᵢⱼ = z_(i, j+2) - 2z_(i, j+1) + zᵢⱼ
+-- 𝚫²ₓᵧzᵢⱼ = [z_(i+1, j+1) - z_(i, j + 1)] - [z_(i+1, j) - zᵢⱼ]
+-- F(x,y) = z₀₀
+--          + (x - x₀)/h₁ * 𝚫ₓz₀₀
+--          + (y - y₀)/h₂ * 𝚫ᵧz₀₀
+--          + [(x - x₀)(x - x₁)]/(2h²₁) * 𝚫²ₓₓz₀₀
+--          + [(x - x₀)(y - y₀)]/(h₁h₂) * 𝚫²ₓᵧz₀₀
+--          + [(y - y₀)(y - y₁)]/(2h²₂) * 𝚫²ᵧᵧz₀₀
 compute :: Matrix -> Matrix
-compute m = Mx.fromRows rows
+compute m = Mx.fromBlocks 0 $ Mx.toLists $ Mx.imap interpolate zss
   where
-    rows = Mx.toRows m
-    hs = argDeltas rows
+    zss = Mx.subMatrix (1, 1) (Mx.rows m - 3, Mx.cols m - 3) m
+
+    interpolate :: (Int, Int) -> CReal -> Matrix
+    interpolate (i, j) z = Mx.matrix (length xs)
+      [ newtonPolynom zss' xyss x y
+      | x <- xs, y <- ys
+      ]
+      where
+        xs = [x | x <- [xj, xj + 0.1 .. xjj], x < xjj]
+        ys = [y | y <- [yi, yi + 0.1 .. yii], y < yii]
+
+        zss' =
+          [ [    z,              m Mx.! (i+1, j+2),   m Mx.! (i+1, j+3)]
+          , [m Mx.! (i+2, j+1),  m Mx.! (i+2, j+2)]
+          , [m Mx.! (i+3, j+1)]
+          ]
+
+        xj  = m Mx.! (0, j)
+        yi  = m Mx.! (i, 0)
+        xjj = m Mx.! (0, j+1)
+        yii = m Mx.! (i+1, 0)
+
+        xyss =
+          [ [xj, xjj]
+          , [yi, yii]
+          ]
 
 
-argDeltas :: [Vector] -> Vec.Vector (CReal, CReal)
-argDeltas [] = Vec.empty
-argDeltas rows@(_:restRows) = Vec.fromList $ zipWith getArgDeltas rows restRows
+newtonPolynom :: [[CReal]] -> [[CReal]] -> CReal -> CReal -> CReal
+newtonPolynom zss xyss x y = z
+  + (x - xj) / hx * dzx
+  + (y - yi) / hy * dzy
+  + ((x - xj) * (x - xjj)) / (2  * hx*hx) * dzxx
+  + ((x - xj) * (y - yi )) / (     hx*hy) * dzxy
+  + ((y - yi) * (y - yii)) / (2  * hy*hy) * dzyy
   where
-    getArgDeltas prev curr =
-      ( curr Vec.! 0 - prev Vec.! 0
-      , curr Vec.! 1 - prev Vec.! 1
-      )
+    [ [z,  zj, zjj], [zi, zij], [zii] ] = zss
+    [ [xj, xjj], [yi, yii] ] = xyss
 
-
-newtonPolynom :: CReal -> CReal -> CReal
-newtonPolynom x y = x * y
+    hx = xjj - xj
+    hy = yii - yi
+    dzx = zi - z
+    dzy = zj - z
+    dzxx = zii - 2 * zi + z
+    dzyy = zjj - 2 * zj + z
+    dzxy = (zij - zj) - (zi - z)
