@@ -29,11 +29,13 @@ triangulate mx = (Mx.fromRows mx', permutations')
         (as':ass', ps') = permuteToMax j ps m
         (ass'', ps'') = go (j + 1) ps' (map updRow ass')
 
-        updRow bs =
-          let
-            k = bs Vec.! j / as' Vec.! j
+        updRow bs
+          | as'j == 0 = error "Can't triangulate matrix"
+          | otherwise = Vec.zipWith op as' bs
+          where
+            as'j = as' Vec.! j
+            k = bs Vec.! j / as'j
             op a b = b - a * k
-          in Vec.zipWith op as' bs
 
 
 permuteToMax :: Int -> Permutations -> [Vector] -> ([Vector], Permutations)
