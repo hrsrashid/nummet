@@ -6,34 +6,36 @@ import qualified Data.Vector       as Vec
 import           Library
 
 
-compute :: Matrix -> Vector
-compute mx = Vec.map (backtrack mx' Vec.!) permutations
+compute :: Matrix -> Either ComputeError Vector
+compute = fmap backtrackPermuted . triangulate
   where
-    (mx', permutations) = triangulate mx
+    backtrackPermuted (mx, permutations) =
+      Vec.map (backtrack mx Vec.!) permutations
 
 
-triangulate :: Matrix -> (Matrix, Permutations)
-triangulate mx = (Mx.fromRows mx', permutations')
+triangulate :: Matrix -> Either ComputeError (Matrix, Permutations)
+triangulate mx = fstToMx <$> go 0 permutations rows
   where
     rows = Mx.toRows mx
     permutations = Vec.fromList [0..(length rows - 1)]
-    (mx', permutations') = go 0 permutations rows
+    fstToMx (mx', permutations') = (Mx.fromRows mx', permutations')
 
-    go :: Int -> Permutations -> [Vector] -> ([Vector], Permutations)
-    go _ ps [] = ([], ps)
+    go :: Int -> Permutations -> [Vector]
+      -> Either ComputeError ([Vector], Permutations)
+    go _ ps [] = Right ([], ps)
     go j ps m@(as:ass)
-      | isLastCol = (m, ps)
-      | otherwise = (as':ass'', ps'')
+      | isLastCol = Right (m, ps)
+      | isZeroPivot = Left SingularMatrix
+      | otherwise = prependFirstRow <$> go (j + 1) ps' (map updRow ass')
       where
         isLastCol = j + 2 >= Vec.length as
+        isZeroPivot = nearZero as'j
+        as'j = as' Vec.! j
         (as':ass', ps') = permuteToMax j ps m
-        (ass'', ps'') = go (j + 1) ps' (map updRow ass')
+        prependFirstRow (ass'', ps'') = (as':ass'', ps'')
 
-        updRow bs
-          | as'j == 0 = error "Can't triangulate matrix"
-          | otherwise = Vec.zipWith op as' bs
+        updRow bs = Vec.zipWith op as' bs
           where
-            as'j = as' Vec.! j
             k = bs Vec.! j / as'j
             op a b = b - a * k
 
@@ -78,9 +80,6 @@ backtrack = foldr eqSolver Vec.empty . Mx.toRows
 eqSolver :: Vector -> Vector -> Vector
 eqSolver as xs = Vec.cons ((Vec.last as' - Vec.sum (resolveKnown as' xs)) / Vec.head as') xs
   where as' = Vec.dropWhile nearZero as
-
-nearZero :: CReal -> Bool
-nearZero x = abs x < 1e-16
 
 resolveKnown :: Vector -> Vector -> Vector
 resolveKnown as xs = Vec.zipWith (*) xs (Vec.tail $ Vec.init as)

@@ -9,11 +9,11 @@ import qualified Data.Scientific           as Sci
 import           Data.Vector
 import           Text.Trifecta
 
-parseFile :: MonadIO m => Parser a -> String -> m (Either ErrInfo a)
+parseFile :: MonadIO m => Parser a -> String -> m (Either String a)
 parseFile p s = toEither <$> parseFromFileEx p s
   where
     toEither (Success a) = Right a
-    toEither (Failure a) = Left a
+    toEither (Failure a) = Left (show a)
 
 parseInput :: Parser a -> Parser a
 parseInput p = skipJunk *> p
