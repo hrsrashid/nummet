@@ -19,18 +19,34 @@ import           Library
 --          + [(x - x₀)(y - y₀)]/(h₁h₂) * 𝚫²ₓᵧz₀₀
 --          + [(y - y₀)(y - y₁)]/(2h²₂) * 𝚫²ᵧᵧz₀₀
 compute :: Matrix -> Matrix
-compute m = Mx.fromBlocks 0 $ Mx.toLists $ Mx.imap interpolate zss
+compute m =
+    Mx.fromLists
+  $ ( \mx -> (:mx)
+    $ Vec.foldl (++) [0]
+    $ Vec.imap (\i x -> genArgs x $ xs Vec.! (i+2)) (Vec.slice 1 (Vec.length xs - 3) xs)
+    )
+  $ ( zipWith (:)
+    $ Vec.foldl (++) []
+    $ Vec.imap (\i y -> genArgs y $ ys Vec.! (i+2)) (Vec.slice 1 (Vec.length ys - 3) ys)
+    )
+  $ Mx.toLists
+  $ Mx.fromBlocks 0
+  $ Mx.toLists
+  $ Mx.imap interpolate zss
   where
+    xs = Mx.takeRow m 0
+    ys = Mx.takeColumn m 0
     zss = Mx.subMatrix (1, 1) (Mx.rows m - 3, Mx.cols m - 3) m
+    genArgs x0 x1 = [x | x <- [x0, x0 + (x1 - x0)/10 .. x1], x < x1]
 
     interpolate :: (Int, Int) -> CReal -> Matrix
-    interpolate (i, j) z = Mx.matrix (length xs)
+    interpolate (i, j) z = Mx.matrix (length xs')
       [ newtonPolynom zss' xyss x y
-      | x <- xs, y <- ys
+      | y <- ys', x <- xs'
       ]
       where
-        xs = [x | x <- [xj, xj + 0.1 .. xjj], x < xjj]
-        ys = [y | y <- [yi, yi + 0.1 .. yii], y < yii]
+        xs' = genArgs xj xjj
+        ys' = genArgs yi yii
 
         zss' =
           [ [    z,              m Mx.! (i+1, j+2),   m Mx.! (i+1, j+3)]
@@ -38,10 +54,10 @@ compute m = Mx.fromBlocks 0 $ Mx.toLists $ Mx.imap interpolate zss
           , [m Mx.! (i+3, j+1)]
           ]
 
-        xj  = m Mx.! (0, j)
-        yi  = m Mx.! (i, 0)
-        xjj = m Mx.! (0, j+1)
-        yii = m Mx.! (i+1, 0)
+        xj  = m Mx.! (0, j+1)
+        yi  = m Mx.! (i+1, 0)
+        xjj = m Mx.! (0, j+2)
+        yii = m Mx.! (i+2, 0)
 
         xyss =
           [ [xj, xjj]
