@@ -1,5 +1,6 @@
 module SlaeGauss where
 
+import           Data.Bifunctor
 import qualified Data.Matrix       as Mx
 import           Data.Number.CReal
 import qualified Data.Vector       as Vec
@@ -14,11 +15,10 @@ compute = fmap backtrackPermuted . triangulate
 
 
 triangulate :: Matrix -> Either ComputeError (Matrix, Permutations)
-triangulate mx = fstToMx <$> go 0 permutations rows
+triangulate mx = first Mx.fromRows <$> go 0 permutations rows
   where
     rows = Mx.toRows mx
     permutations = Vec.fromList [0..(length rows - 1)]
-    fstToMx (mx', permutations') = (Mx.fromRows mx', permutations')
 
     go :: Int -> Permutations -> [Vector]
       -> Either ComputeError ([Vector], Permutations)
@@ -26,13 +26,12 @@ triangulate mx = fstToMx <$> go 0 permutations rows
     go j ps m@(as:ass)
       | isLastCol = Right (m, ps)
       | isZeroPivot = Left SingularMatrix
-      | otherwise = prependFirstRow <$> go (j + 1) ps' (map updRow ass')
+      | otherwise = first (as':) <$> go (j + 1) ps' (map updRow ass')
       where
         isLastCol = j + 2 >= Vec.length as
         isZeroPivot = nearZero as'j
         as'j = as' Vec.! j
         (as':ass', ps') = permuteToMax j ps m
-        prependFirstRow (ass'', ps'') = (as':ass'', ps'')
 
         updRow bs = Vec.zipWith op as' bs
           where
