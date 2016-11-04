@@ -78,8 +78,8 @@ newtonPolynom zss xyss x y = z
 
     hx = xjj - xj
     hy = yii - yi
-    dzx = zi - z
-    dzy = zj - z
-    dzxx = zii - 2 * zi + z
-    dzyy = zjj - 2 * zj + z
-    dzxy = (zij - zj) - (zi - z)
+    dzx = zj - z
+    dzy = zi - z
+    dzxx = zjj - 2 * zj + z
+    dzyy = zii - 2 * zi + z
+    dzxy = (zij - zi) - (zj - z)
