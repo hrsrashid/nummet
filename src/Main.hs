@@ -21,7 +21,7 @@ main = do
 
 
 parse :: MonadIO m => String -> m (Either String Matrix)
-parse = parseFile (parseInput parseMatrix)
+parse = parseFile (parseInput $ parseMatrix parseDecimal)
 
 
 launch :: String -> Matrix -> Either String String
