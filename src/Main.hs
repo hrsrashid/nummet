@@ -28,6 +28,7 @@ launch :: String -> Matrix -> Either String String
 launch algo input =
   case algo of
     "slae" -> bimap show stringify $ SG.compute input
+    "slnae" -> Right "not impl"
     "interpolate" -> Right $ stringify $ BIN.compute input
     _ -> Left $ show NoAlgorithm
 

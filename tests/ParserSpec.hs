@@ -4,6 +4,7 @@ import qualified Data.Vector   as Vec
 import           Parser
 import           Test.Hspec
 import           Text.Trifecta
+import qualified Library       as Lib
 
 
 toEither :: Result a -> Either String a
@@ -69,3 +70,31 @@ suite = do
 
     it "with trailing eol" $
       parse "1 2 3\n4 5 6\n7 8 9\n" `shouldBe` testMatrix
+
+  describe "Parse function" $ do
+    let parse p s = toEither (parseString p mempty s)
+
+    it "constant" $
+      parse parseFunction "345" `shouldBe` Right (Lib.Function (const 345))
+
+    it "x" $
+      parse parseFunction "x" `shouldBe` Right (Lib.Function id)
+
+    it "sin" $
+      parse parseFunction "sin" `shouldBe` Right (Lib.Function sin)
+
+    it "log" $
+      parse parseFunction "log" `shouldBe` Right (Lib.Function log)
+
+    it "exp" $
+      parse parseFunction "exp" `shouldBe` Right (Lib.Function exp)
+
+    it "composition sin(x)" $
+      parse parseExpression "sin(x)" `shouldBe` Right (Lib.Function sin)
+
+    it "composition sin(log(x))" $
+      parse parseExpression "sin(log(x))" `shouldBe` Right (Lib.compose (Lib.Function sin) (Lib.Function log))
+
+    it "of sum of funcs" $
+      parse parseExpression "sin(x)+log(x)" `shouldBe` Right (Lib.Function (\x -> sin x + log x))
+

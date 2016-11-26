@@ -8,6 +8,7 @@ import           Data.Number.CReal
 import qualified Data.Scientific           as Sci
 import           Data.Vector
 import           Text.Trifecta
+import qualified Library                   as Lib
 
 parseFile :: MonadIO m => Parser a -> String -> m (Either String a)
 parseFile p s = toEither <$> parseFromFileEx p s
@@ -45,3 +46,60 @@ parseVectors = parseVector `sepEndBy1` some (oneOf eol)
 
 parseMatrix :: Parser (Matrix Vector CReal)
 parseMatrix = fromRows <$> parseVectors
+
+parseFunction :: Parser Lib.Function
+parseFunction = choice
+  [ parseConst
+  , parseX
+  , parseSin
+  , parseLog
+  , parseExp
+  ]
+
+parseConst :: Parser Lib.Function
+parseConst = Lib.Function . const <$> parseDecimal
+
+parseX :: Parser Lib.Function
+parseX = char 'x' >> pure (Lib.Function id)
+
+parseSin :: Parser Lib.Function
+parseSin = string "sin" >> pure (Lib.Function sin)
+
+parseLog :: Parser Lib.Function
+parseLog = string "log" >> pure (Lib.Function log)
+
+parseExp :: Parser Lib.Function
+parseExp = string "exp" >> pure (Lib.Function exp)
+
+
+operators = "+-*/"
+
+type Operator = CReal -> CReal -> CReal
+
+parseOperator :: Parser Operator
+parseOperator = do
+  op <- oneOf operators
+  case op of
+    '+' -> return (+)
+    '-' -> return (-)
+    '*' -> return (*)
+    '/' -> return (/)
+
+-- operators, function compositions ...
+parseExpression :: Parser Lib.Function
+parseExpression = do
+  f <- parseFunction
+  expr <- optional (char '(' *> parseExpression <* char ')')
+
+  let g = case expr of
+            Nothing -> f
+            (Just g) -> Lib.compose f g
+
+  op <- optional $ do
+    op <- parseOperator
+    h <- parseExpression
+    return $ \x -> Lib.runFunction g x `op` Lib.runFunction h x
+
+  case op of
+    Nothing -> return g
+    (Just h) -> return $ Lib.Function h
