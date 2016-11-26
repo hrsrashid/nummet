@@ -9,17 +9,20 @@ type FMatrix = Mx.Matrix Function
 type Vector = Vec.Vector CReal
 type Permutations = Vec.Vector Int
 
-newtype Function = Function { runFunction :: CReal -> CReal }
+newtype Function = Function { runFunction :: Vector -> CReal }
 
 instance Show Function where
   show _ = "<function>"
 
 instance Eq Function where
   Function f == Function g = and $ zipWith (==) (map f args) (map g args)
-    where args = [1, 10 .. 100]
+    where args = Vec.fromList <$> [[1, 10 .. 100] | x <- [1..10]]
 
 compose :: Function -> Function -> Function
-compose f g = Function $ runFunction f . runFunction g
+compose f g = Function $ runFunction f . Vec.fromList . (:[]) . runFunction g
+
+simpleFunc :: (CReal -> CReal) -> Function
+simpleFunc f = Function $ f . (Vec.! 0)
 
 data ComputeError =
     NoAlgorithm

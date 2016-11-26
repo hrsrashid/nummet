@@ -60,16 +60,19 @@ parseConst :: Parser Lib.Function
 parseConst = Lib.Function . const <$> parseDecimal
 
 parseX :: Parser Lib.Function
-parseX = char 'x' >> pure (Lib.Function id)
+parseX = do
+  char 'x'
+  index <- natural
+  return $ Lib.Function (Data.Vector.! fromIntegral index)
 
 parseSin :: Parser Lib.Function
-parseSin = string "sin" >> pure (Lib.Function sin)
+parseSin = string "sin" >> pure (Lib.simpleFunc sin)
 
 parseLog :: Parser Lib.Function
-parseLog = string "log" >> pure (Lib.Function log)
+parseLog = string "log" >> pure (Lib.simpleFunc log)
 
 parseExp :: Parser Lib.Function
-parseExp = string "exp" >> pure (Lib.Function exp)
+parseExp = string "exp" >> pure (Lib.simpleFunc exp)
 
 
 operators = "+-*/"

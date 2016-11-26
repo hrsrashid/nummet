@@ -58,29 +58,35 @@ suite = do
     it "constant" $
       parse parseFunction "345" `shouldBe` Right (Lib.Function (const 345))
 
-    it "x" $
-      parse parseFunction "x" `shouldBe` Right (Lib.Function id)
+    it "x1" $
+      parse parseFunction "x1" `shouldBe` Right (Lib.Function (Vec.! 1))
+
+    it "x3" $
+      parse parseFunction "x3" `shouldBe` Right (Lib.Function (Vec.! 3))
 
     it "sin" $
-      parse parseFunction "sin" `shouldBe` Right (Lib.Function sin)
+      parse parseFunction "sin" `shouldBe` Right (Lib.simpleFunc sin)
 
     it "log" $
-      parse parseFunction "log" `shouldBe` Right (Lib.Function log)
+      parse parseFunction "log" `shouldBe` Right (Lib.simpleFunc log)
 
     it "exp" $
-      parse parseFunction "exp" `shouldBe` Right (Lib.Function exp)
+      parse parseFunction "exp" `shouldBe` Right (Lib.simpleFunc exp)
 
-    it "composition sin(x)" $
-      parse parseExpression "sin(x)" `shouldBe` Right (Lib.Function sin)
+    it "composition sin(x0)" $
+      parse parseExpression "sin(x0)" `shouldBe` Right (Lib.simpleFunc sin)
 
-    it "composition sin(log(x))" $
-      parse parseExpression "sin(log(x))" `shouldBe` Right (Lib.compose (Lib.Function sin) (Lib.Function log))
+    it "composition sin(log(x0))" $
+      parse parseExpression "sin(log(x0))" `shouldBe` Right (Lib.compose (Lib.simpleFunc sin) (Lib.simpleFunc log))
 
     it "of sum of funcs" $
-      parse parseExpression "sin(x)+log(x)" `shouldBe` Right (Lib.Function (\x -> sin x + log x))
+      parse parseExpression "sin(x0)+log(x0)" `shouldBe` Right (Lib.simpleFunc (\x -> sin x + log x))
 
     it "of fraction of funcs" $
-      parse parseExpression "sin(x)/exp(x)" `shouldBe` Right (Lib.Function (\x -> sin x / exp x))
+      parse parseExpression "sin(x0)/exp(x0)" `shouldBe` Right (Lib.simpleFunc (\x -> sin x / exp x))
+
+    it "with different vars" $
+      parse parseExpression "x0*x1*x2" `shouldBe` Right (Lib.Function (\v -> v Vec.! 0 * v Vec.! 1 * v Vec.! 2))
 
   
   describe "Parsing vector" $ do
@@ -93,11 +99,11 @@ suite = do
       parse parseDecimal "4.9\t8.3\t9 10.5 \t" `shouldBe` Right [4.9, 8.3, 9, 10.5]
 
     it "of funcs" $
-      parse parseExpression "1 2 sin(x) exp(x)+sin(log(x))" `shouldBe` Right
+      parse parseExpression "1 2 sin(x0) exp(x0)+sin(log(x0))" `shouldBe` Right
         [ Lib.Function (const 1)
         , Lib.Function (const 2)
-        , Lib.Function sin
-        , Lib.Function (\x -> exp x + sin (log x))
+        , Lib.simpleFunc sin
+        , Lib.simpleFunc (\x -> exp x + sin (log x))
         ]
 
   describe "Parsing matrix" $ do
@@ -111,8 +117,8 @@ suite = do
       parse parseDecimal "1 2 3\n4 5 6\n7 8 9\n" `shouldBe` testMatrix
 
     it "of funcs" $
-      parse parseExpression "1 4 sin(x)\n5 6 exp(sin(x))\n9 10 x/9" `shouldBe` Right
-        [ [Lib.Function (const 1), Lib.Function (const 4), Lib.Function sin]
-        , [Lib.Function (const 5), Lib.Function (const 6), Lib.Function (exp . sin)]
-        , [Lib.Function (const 9), Lib.Function (const 10), Lib.Function (/9)]
+      parse parseExpression "1 4 sin(x0)\n5 6 exp(sin(x0))\n9 10 x0/9" `shouldBe` Right
+        [ [Lib.Function (const 1), Lib.Function (const 4), Lib.simpleFunc sin]
+        , [Lib.Function (const 5), Lib.Function (const 6), Lib.simpleFunc (exp . sin)]
+        , [Lib.Function (const 9), Lib.Function (const 10), Lib.simpleFunc (/9)]
         ]
