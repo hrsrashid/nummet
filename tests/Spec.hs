@@ -3,6 +3,7 @@ module Main where
 import           BivarInterpolNewtonSpec as BINS
 import           ParserSpec              as PS
 import           SlaeGaussSpec           as SGS
+import           SnlaePicardSpec         as SPS
 import           StringifySpec           as SS
 import           Test.Hspec
 
@@ -13,3 +14,4 @@ main = hspec $ do
   SS.suite
   SGS.suite
   BINS.suite
+  SPS.suite

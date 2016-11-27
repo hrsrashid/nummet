@@ -27,6 +27,7 @@ library
                      , Library
                      , Parser
                      , Stringify
+                     , SnlaePicard
   build-depends:       base
                      , scientific
                      , numbers
@@ -41,6 +42,7 @@ test-suite numanal-test
   other-modules:       ParserSpec
                      , StringifySpec
                      , SlaeGaussSpec
+                     , SnlaePicardSpec
                      , BivarInterpolNewtonSpec
   hs-source-dirs:      tests
   build-depends:       base

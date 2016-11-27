@@ -8,7 +8,7 @@ import qualified SlaeGauss
 
 
 suite :: SpecWith ()
-suite = do
+suite =
   describe "SlaeGauss" $ do
     let compute = fmap Vec.toList . SlaeGauss.compute . Mx.fromLists
 

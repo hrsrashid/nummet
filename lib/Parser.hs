@@ -57,36 +57,38 @@ parseFunction = choice
   ]
 
 parseConst :: Parser Lib.Function
-parseConst = Lib.Function . const <$> parseDecimal
+parseConst = do
+  x <- parseDecimal
+  return $ Lib.Function (show x) (const x)
 
 parseX :: Parser Lib.Function
 parseX = do
   char 'x'
   index <- natural
-  return $ Lib.Function (Data.Vector.! fromIntegral index)
+  return $ Lib.Function ("x" L.++ show index) (Data.Vector.! fromIntegral index)
 
 parseSin :: Parser Lib.Function
-parseSin = string "sin" >> pure (Lib.simpleFunc sin)
+parseSin = string "sin" >> pure (Lib.simpleFunc "sin" sin)
 
 parseLog :: Parser Lib.Function
-parseLog = string "log" >> pure (Lib.simpleFunc log)
+parseLog = string "log" >> pure (Lib.simpleFunc "log" log)
 
 parseExp :: Parser Lib.Function
-parseExp = string "exp" >> pure (Lib.simpleFunc exp)
+parseExp = string "exp" >> pure (Lib.simpleFunc "exp" exp)
 
 
 operators = "+-*/"
 
 type Operator = CReal -> CReal -> CReal
 
-parseOperator :: Parser Operator
+parseOperator :: Parser (String, Operator)
 parseOperator = do
   op <- oneOf operators
   case op of
-    '+' -> return (+)
-    '-' -> return (-)
-    '*' -> return (*)
-    '/' -> return (/)
+    '+' -> return ("+", (+))
+    '-' -> return ("-", (-))
+    '*' -> return ("*", (*))
+    '/' -> return ("/", (/))
 
 -- operators, function compositions ...
 parseExpression :: Parser Lib.Function
@@ -99,10 +101,10 @@ parseExpression = do
             (Just g) -> Lib.compose f g
 
   op <- optional $ do
-    op <- parseOperator
+    (sop, op) <- parseOperator
     h <- parseExpression
-    return $ \x -> Lib.runFunction g x `op` Lib.runFunction h x
+    return $ Lib.Function (show g L.++ sop L.++ show h) $ \x -> Lib.runFunction g x `op` Lib.runFunction h x
 
   case op of
     Nothing -> return g
-    (Just h) -> return $ Lib.Function h
+    (Just h) -> return h

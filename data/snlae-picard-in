@@ -1,6 +1,6 @@
 # example of input data
 # linear coefficients | vector of non-linear functions
 
-1 2 4 sin(x)+log(x)
-0 3 5 exp(x)
-2 1 0 0
+1 2 4 sin(x0)+log(x1)
+0 3 5 x2*x1
+2 1 9 0

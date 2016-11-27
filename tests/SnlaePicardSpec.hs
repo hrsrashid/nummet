@@ -14,12 +14,12 @@ suite =
 
     it "solve {x + y + x * y - 5 = 0, 2x + 3y + x * x - 11 = 0}" $
       compute
-        [ [ Function (const 1)
-          , Function (const 1)
-          , Function (\v -> (v Vec.! 0) * (v Vec.! 1) - 5)
+        [ [ Function "1" (const 1)
+          , Function "1" (const 1)
+          , Function "x0*x1-5" (\v -> (v Vec.! 0) * (v Vec.! 1) - 5)
           ]
-        , [ Function (const 2)
-          , Function (const 3)
-          , Function (\v -> (v Vec.! 0) * (v Vec.! 0) - 11)
+        , [ Function "2" (const 2)
+          , Function "3" (const 3)
+          , Function "x0*x0-11" (\v -> (v Vec.! 0) * (v Vec.! 0) - 11)
           ]
-        ] `shouldBe` [2, 1]
+        ] `shouldBe` Right [2, 1]

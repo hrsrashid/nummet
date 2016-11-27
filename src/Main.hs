@@ -2,7 +2,7 @@ module Main where
 
 import           Control.Exception
 import           Control.Monad.IO.Class
-import           System.Environment (getArgs)
+import           System.Environment (getArgs, getProgName)
 import           Data.Bifunctor
 
 import           Parser
@@ -10,46 +10,57 @@ import           Stringify
 import           Library
 import qualified SlaeGauss as SG
 import qualified BivarInterpolNewton as BIN
+import qualified SnlaePicard as SP
 
 
 main :: IO ()
 main = do
   args <- getArgs
   case args of
-    [algo, input, output] -> (>>= launch algo) <$> parse input >>= report output
-    _ -> putStrLn cliHelp
+    [algo, input, output] -> do
+      res <- launch algo input
+      report output res 
+    _ -> cliHelp
 
 
-parse :: MonadIO m => String -> m (Either String Matrix)
-parse = parseFile (parseInput $ parseMatrix parseDecimal)
+scalarMatrix = parseInput $ parseMatrix parseDecimal
+funcMatrix = parseInput $ parseMatrix parseExpression
 
 
-launch :: String -> Matrix -> Either String String
-launch algo input =
-  case algo of
-    "slae" -> bimap show stringify $ SG.compute input
-    "slnae" -> Right "not impl"
-    "interpolate" -> Right $ stringify $ BIN.compute input
-    _ -> Left $ show NoAlgorithm
+launch :: MonadIO m => String -> String -> m (Either String String)
+launch "slae" input = do
+  inData <- parseFile scalarMatrix input
+  return $ stringify <$> (first show . SG.compute =<< inData)
+
+launch "snlae" input = do
+  inData <- parseFile funcMatrix input
+  return $ stringify <$> (first show . SP.compute =<< inData)
+  
+launch "interpolate" input = do
+  inData <- parseFile scalarMatrix input
+  return $ stringify . BIN.compute <$> inData
+
+launch _ _ = return $ Left $ show NoAlgorithm
 
 
-report :: String -> Either String String -> IO ()
-report output result =
-  case result of
-    Left e -> do
-      putStrLn e
-      putStrLn "Failed."
+report _ (Left e) = do
+  putStrLn e
+  putStrLn "Failed."
 
-    Right x -> do
-      writeFile output x
-        `catch` \(SomeException _) -> putStrLn x
-      putStrLn "Done."
+report output (Right x) = do
+  writeFile output x
+    `catch` \(SomeException _) -> putStrLn x
+  putStrLn "Done."
 
 
-cliHelp :: String
-cliHelp = "Usage: ... ALGO INPUT OUTPUT\n"
+cliHelp :: IO ()
+cliHelp = do
+  putStr "Usage: "
+  putStr =<< getProgName
+  putStrLn $ " ALGO INPUT OUTPUT\n"
        ++ "ALGO\tone of:\n"
        ++     "\tslae\t\tSolve SLAE by Gaussian elimination\n"
+       ++     "\tsnlae\t\tSolve SNLAE using Picard method\n"
        ++     "\tinterpolate\tNewton bivariate polynomial interpolation\n"
        ++ "\n"
        ++ "INPUT\tfilename of input data\n"
