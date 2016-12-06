@@ -11,6 +11,10 @@ toEither :: Result a -> Either String a
 toEither (Success a) = Right a
 toEither (Failure e) = Left $ show e
 
+fSin = Lib.simpleFunc "sin" $ Right . sin
+fLog = Lib.simpleFunc "log" $ Right . log
+fExp = Lib.simpleFunc "exp" $ Right . exp
+
 
 suite :: SpecWith ()
 suite = do
@@ -56,37 +60,37 @@ suite = do
     let parse p s = toEither (parseString p mempty s)
 
     it "constant" $
-      parse parseFunction "345" `shouldBe` Right (Lib.Function "345" (const 345))
+      parse parseFunction "345" `shouldBe` Right (Lib.Function "345" (const $ Right 345))
 
     it "x1" $
-      parse parseFunction "x1" `shouldBe` Right (Lib.Function "x1" (Vec.! 1))
+      parse parseFunction "x1" `shouldBe` Right (Lib.Function "x1" $ Right . (Vec.! 1))
 
     it "x3" $
-      parse parseFunction "x3" `shouldBe` Right (Lib.Function "x3" (Vec.! 3))
+      parse parseFunction "x3" `shouldBe` Right (Lib.Function "x3" $ Right . (Vec.! 3))
 
     it "sin" $
-      parse parseFunction "sin" `shouldBe` Right (Lib.simpleFunc "sin" sin)
+      parse parseFunction "sin" `shouldBe` Right fSin
 
     it "log" $
-      parse parseFunction "log" `shouldBe` Right (Lib.simpleFunc "log" log)
+      parse parseFunction "log" `shouldBe` Right fLog
 
     it "exp" $
-      parse parseFunction "exp" `shouldBe` Right (Lib.simpleFunc "exp" exp)
+      parse parseFunction "exp" `shouldBe` Right fExp
 
     it "composition sin(x0)" $
-      parse parseExpression "sin(x0)" `shouldBe` Right (Lib.simpleFunc "sin" sin)
+      parse parseExpression "sin(x0)" `shouldBe` Right fSin
 
     it "composition sin(log(x0))" $
-      parse parseExpression "sin(log(x0))" `shouldBe` Right (Lib.compose (Lib.simpleFunc "sin" sin) (Lib.simpleFunc "log" log))
+      parse parseExpression "sin(log(x0))" `shouldBe` Right (Lib.compose fSin fLog)
 
     it "of sum of funcs" $
-      parse parseExpression "sin(x0)+log(x0)" `shouldBe` Right (Lib.simpleFunc "sin(x0)+log(x0)" (\x -> sin x + log x))
+      parse parseExpression "sin(x0)+log(x0)" `shouldBe` Right (Lib.simpleFunc "sin(x0)+log(x0)" (\x -> Right $ sin x + log x))
 
     it "of fraction of funcs" $
-      parse parseExpression "sin(x0)/exp(x0)" `shouldBe` Right (Lib.simpleFunc "sin(x0)/exp(x0)" (\x -> sin x / exp x))
+      parse parseExpression "sin(x0)/exp(x0)" `shouldBe` Right (Lib.simpleFunc "sin(x0)/exp(x0)" (\x -> Right $ sin x / exp x))
 
     it "with different vars" $
-      parse parseExpression "x0*x1*x2" `shouldBe` Right (Lib.Function "x0*x1*x2" (\v -> v Vec.! 0 * v Vec.! 1 * v Vec.! 2))
+      parse parseExpression "x0*x1*x2" `shouldBe` Right (Lib.Function "x0*x1*x2" (\v -> Right $ v Vec.! 0 * v Vec.! 1 * v Vec.! 2))
 
   
   describe "Parsing vector" $ do
@@ -100,10 +104,10 @@ suite = do
 
     it "of funcs" $
       parse parseExpression "1 2 sin(x0) exp(x0)+sin(log(x0))" `shouldBe` Right
-        [ Lib.Function "1" (const 1)
-        , Lib.Function "2" (const 2)
-        , Lib.simpleFunc "sin" sin
-        , Lib.simpleFunc "exp(x0)+sin(log(x0))" (\x -> exp x + sin (log x))
+        [ Lib.Function "1" (const $ Right 1)
+        , Lib.Function "2" (const $ Right 2)
+        , fSin
+        , Lib.simpleFunc "exp(x0)+sin(log(x0))" (\x -> Right $ exp x + sin (log x))
         ]
 
   describe "Parsing matrix" $ do
@@ -118,14 +122,14 @@ suite = do
 
     it "of funcs" $
       parse parseExpression "1 4 sin(x0)\n5 6 exp(sin(x0))\n9 10 x0/9" `shouldBe` Right
-        [ [Lib.Function "1" (const 1), Lib.Function "4" (const 4), Lib.simpleFunc "sin" sin]
-        , [Lib.Function "5" (const 5), Lib.Function "6" (const 6), Lib.simpleFunc "exp(sin(x0))" (exp . sin)]
-        , [Lib.Function "9" (const 9), Lib.Function "10" (const 10), Lib.simpleFunc "x0/9" (/9)]
+        [ [Lib.Function "1" (const $ Right 1), Lib.Function "4" (const $ Right 4), fSin]
+        , [Lib.Function "5" (const $ Right 5), Lib.Function "6" (const $ Right 6), Lib.simpleFunc "exp(sin(x0))" (Right . exp . sin)]
+        , [Lib.Function "9" (const $ Right 9), Lib.Function "10" (const $ Right 10), Lib.simpleFunc "x0/9" $ Right . (/9)]
         ]
 
     it "of funcs2" $
       parse parseExpression "1 2 4 sin(x0)+log(x1)\n0 3 5 x2*x1\n2 1 9 0" `shouldBe` Right
-        [ [Lib.Function "1" (const 1), Lib.Function "2" (const 2), Lib.Function "4" (const 4), Lib.Function "sin(x0)+log(x1)" (\v -> sin (v Vec.! 0) + log (v Vec.! 1))]
-        , [Lib.Function "0" (const 0), Lib.Function "3" (const 3), Lib.Function "5" (const 5), Lib.Function "x2*x1" (\v -> (v Vec.! 2) * (v Vec.! 1))]
-        , [Lib.Function "2" (const 2), Lib.Function "1" (const 1), Lib.Function "9" (const 9), Lib.Function "0" (const 0)]
+        [ [Lib.Function "1" (const $ Right 1), Lib.Function "2" (const $ Right 2), Lib.Function "4" (const $ Right 4), Lib.Function "sin(x0)+log(x1)" (\v -> Right $ sin (v Vec.! 0) + log (v Vec.! 1))]
+        , [Lib.Function "0" (const $ Right 0), Lib.Function "3" (const $ Right 3), Lib.Function "5" (const $ Right 5), Lib.Function "x2*x1" (\v -> Right $ (v Vec.! 2) * (v Vec.! 1))]
+        , [Lib.Function "2" (const $ Right 2), Lib.Function "1" (const $ Right 1), Lib.Function "9" (const $ Right 9), Lib.Function "0" (const $ Right 0)]
         ]
