@@ -5,7 +5,6 @@ import Data.Either (partitionEithers)
 import qualified Data.Vector as Vec
 import qualified Data.Matrix as Mx
 import qualified Data.Matrix.Generic as DMG (fromList)
-import Data.Number.CReal
 import Library
 import qualified SlaeGauss as SG
 
@@ -14,7 +13,7 @@ compute fm = go 0 Nothing xs0
   where
     xs0 = Vec.fromList $ replicate (Mx.rows fm) 1
 
-    go :: Int -> Maybe CReal -> Vector -> Either ComputeError Vector
+    go :: Int -> Maybe Double -> Vector -> Either ComputeError Vector
     go iters d0 xs
       | iters >= 5 = Right xs
       | converges = xs'
@@ -42,7 +41,7 @@ compute fm = go 0 Nothing xs0
         (errs, ys) = partitionEithers $ Mx.toList $ Mx.map (`runFunction` xs) fm
          
 
-    mapLastCol :: (CReal -> CReal) -> (Int, Int) -> CReal -> CReal
+    mapLastCol :: (Double -> Double) -> (Int, Int) -> Double -> Double
     mapLastCol f (_, j) a
                 | j+1 == Mx.cols fm = f a
                 | otherwise = a

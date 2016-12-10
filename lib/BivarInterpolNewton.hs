@@ -1,7 +1,6 @@
 module BivarInterpolNewton where
 
 import qualified Data.Matrix       as Mx
-import           Data.Number.CReal
 import qualified Data.Vector       as Vec
 import           Library
 
@@ -39,7 +38,7 @@ compute m =
     zss = Mx.subMatrix (1, 1) (Mx.rows m - 3, Mx.cols m - 3) m
     genArgs x0 x1 = [x | x <- [x0, x0 + (x1 - x0)/10 .. x1], x < x1]
 
-    interpolate :: (Int, Int) -> CReal -> Matrix
+    interpolate :: (Int, Int) -> Double -> Matrix
     interpolate (i, j) z = Mx.matrix (length xs')
       [ newtonPolynom zss' xyss x y
       | y <- ys', x <- xs'
@@ -65,7 +64,7 @@ compute m =
           ]
 
 
-newtonPolynom :: [[CReal]] -> [[CReal]] -> CReal -> CReal -> CReal
+newtonPolynom :: [[Double]] -> [[Double]] -> Double -> Double -> Double
 newtonPolynom zss xyss x y = z
   + (x - xj) / hx * dzx
   + (y - yi) / hy * dzy

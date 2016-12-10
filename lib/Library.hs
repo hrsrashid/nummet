@@ -2,17 +2,16 @@ module Library where
 
 import Data.List (intercalate)
 import qualified Data.Matrix       as Mx
-import           Data.Number.CReal
 import qualified Data.Vector       as Vec
 
-type Matrix = Mx.Matrix CReal
+type Matrix = Mx.Matrix Double
 type FMatrix = Mx.Matrix Function
-type Vector = Vec.Vector CReal
+type Vector = Vec.Vector Double
 type Permutations = Vec.Vector Int
 
 data Function = Function
   { showFunction :: String
-  , runFunction :: Vector -> Either ComputeError CReal
+  , runFunction :: Vector -> Either ComputeError Double
   }
 
 instance Show Function where
@@ -28,7 +27,7 @@ instance Eq Function where
 compose :: Function -> Function -> Function
 compose f g = Function (show f ++ "(" ++ show g ++ ")") (\v -> runFunction f =<< (Vec.fromList . (: []) <$> runFunction g v))
 
-simpleFunc :: String -> (CReal -> Either ComputeError CReal) -> Function
+simpleFunc :: String -> (Double -> Either ComputeError Double) -> Function
 simpleFunc s f = Function s $ f . (Vec.! 0)
 
 data ComputeError =
@@ -46,5 +45,5 @@ instance Show ComputeError where
   show (ArgumentOutOfRange s) = "Argument to function out of range: " ++ s
   show (Bunch errs) = intercalate "\n" $ map show errs
 
-nearZero :: CReal -> Bool
-nearZero x = abs x < 1e-16
+nearZero :: Double -> Bool
+nearZero x = abs x < 1e-7

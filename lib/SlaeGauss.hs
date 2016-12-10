@@ -2,7 +2,6 @@ module SlaeGauss where
 
 import           Data.Bifunctor
 import qualified Data.Matrix       as Mx
-import           Data.Number.CReal
 import qualified Data.Vector       as Vec
 import           Library
 
@@ -47,13 +46,13 @@ permuteToMax col ps m =
   where
     (i, j, _) = foldr imax (0, 0, 0) $ zip [0..] m
 
-    imax :: (Int, Vec.Vector CReal) -> (Int, Int, CReal) -> (Int, Int, CReal)
+    imax :: (Int, Vec.Vector Double) -> (Int, Int, Double) -> (Int, Int, Double)
     imax (i, v) oldMax@(_, _, max)
         | rowMax > max = (i, j + col, rowMax)
         | otherwise = oldMax
         where (j, rowMax) = Vec.ifoldl vimax (0, 0) (Vec.drop col $ Vec.init v)
 
-    vimax :: (Int, CReal) -> Int -> CReal -> (Int, CReal)
+    vimax :: (Int, Double) -> Int -> Double -> (Int, Double)
     vimax (i, max) k a
         | a > max = (k, a)
         | otherwise = (i, max)

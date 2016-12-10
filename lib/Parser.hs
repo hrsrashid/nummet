@@ -4,11 +4,11 @@ import           Control.Applicative
 import           Control.Monad.IO.Class
 import qualified Data.List                 as L
 import           Data.Matrix.Dense.Generic
-import           Data.Number.CReal
 import qualified Data.Scientific           as Sci
 import           Data.Vector
 import           Text.Trifecta
 import qualified Library                   as Lib
+import           Stringify
 
 parseFile :: MonadIO m => Parser a -> String -> m (Either String a)
 parseFile p s = toEither <$> parseFromFileEx p s
@@ -33,7 +33,7 @@ comment = do
   _ <- char '#'
   some (noneOf eol)
 
-parseDecimal :: Parser CReal
+parseDecimal :: Parser Double
 parseDecimal = fmap (either fromInteger Sci.toRealFloat) $ runUnspaced $ do
   _ <- many (oneOf space')
   integerOrScientific
@@ -71,7 +71,7 @@ parseSin :: Parser Lib.Function
 parseSin = string "sin" >> pure (Lib.simpleFunc "sin" $ Right . sin)
 
 parseLog :: Parser Lib.Function
-parseLog = string "log" >> pure (Lib.simpleFunc "log" (\x -> if x > 0 then Right (log x) else Left (Lib.ArgumentOutOfRange $ show x L.++ " must be positive (log)")))
+parseLog = string "log" >> pure (Lib.simpleFunc "log" (\x -> if x > 0 then Right (log x) else Left (Lib.ArgumentOutOfRange $ stringify x L.++ " must be positive (log)")))
 
 parseExp :: Parser Lib.Function
 parseExp = string "exp" >> pure (Lib.simpleFunc "exp" $ Right . exp)
@@ -79,7 +79,7 @@ parseExp = string "exp" >> pure (Lib.simpleFunc "exp" $ Right . exp)
 
 operators = "+-*/"
 
-type Operator = CReal -> CReal -> CReal
+type Operator = Double -> Double -> Double
 
 parseOperator :: Parser (String, Operator)
 parseOperator = do

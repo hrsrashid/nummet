@@ -3,11 +3,12 @@ module BivarInterpolNewtonSpec where
 import qualified BivarInterpolNewton
 import qualified Data.Matrix         as Mx
 import           Test.Hspec
+import           TestLib
 
 
 suite :: SpecWith ()
 suite = describe "Newton bivariate polynomial interpolation" $ do
-  let compute = Mx.toLists . BivarInterpolNewton.compute . Mx.fromLists
+  let compute = toCReal . Mx.toLists . BivarInterpolNewton.compute . Mx.fromLists
 
   it "approx correctly" $
     compute
@@ -15,7 +16,7 @@ suite = describe "Newton bivariate polynomial interpolation" $ do
     , [2, 5, 6, 10]
     , [4, 8, 9, 11]
     , [6, 3, 4,  7]
-    ] `shouldBe`
+    ] `shouldBe` toCReal
     [ [0.0,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9]
     , [2.0,5.0,4.965,4.96,4.985,5.04,5.125,5.24,5.385,5.56,5.765]
     , [2.2,5.66,5.625,5.62,5.645,5.7,5.785,5.9,6.045,6.22,6.425]
