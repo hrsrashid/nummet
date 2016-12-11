@@ -52,8 +52,10 @@ parseFunction = choice
   [ parseConst
   , parseX
   , parseSin
+  , parseCos
   , parseLog
   , parseExp
+  , parseSqrt
   ]
 
 parseConst :: Parser Lib.Function
@@ -70,14 +72,20 @@ parseX = runUnspaced $ do
 parseSin :: Parser Lib.Function
 parseSin = string "sin" >> pure (Lib.simpleFunc "sin" $ Right . sin)
 
+parseCos :: Parser Lib.Function
+parseCos = string "cos" >> pure (Lib.simpleFunc "cos" $ Right . cos)
+
 parseLog :: Parser Lib.Function
 parseLog = string "log" >> pure (Lib.simpleFunc "log" (\x -> if x > 0 then Right (log x) else Left (Lib.ArgumentOutOfRange $ stringify x L.++ " must be positive (log)")))
+
+parseSqrt :: Parser Lib.Function
+parseSqrt = string "sqrt" >> pure (Lib.simpleFunc "sqrt" (\x -> if x >= 0 then Right (sqrt x) else Left (Lib.ArgumentOutOfRange $ stringify x L.++ " must be positive (sqrt)")))
 
 parseExp :: Parser Lib.Function
 parseExp = string "exp" >> pure (Lib.simpleFunc "exp" $ Right . exp)
 
 
-operators = "+-*/"
+operators = "+-*/^"
 
 type Operator = Double -> Double -> Double
 
@@ -91,17 +99,10 @@ parseOperator = do
         '-' -> (-)
         '*' -> (*)
         '/' -> (/)
+        '^' -> (**)
 
--- operators, function compositions ...
-parseExpression :: Parser Lib.Function
-parseExpression = do
-  f <- parseFunction
-  expr <- optional (char '(' *> parseExpression <* char ')')
-
-  let g = case expr of
-            Nothing -> f
-            (Just g) -> Lib.compose f g
-
+parseOpOperand :: Lib.Function -> Parser Lib.Function
+parseOpOperand g = do
   op <- optional $ do
     (sop, op) <- parseOperator
     h <- parseExpression
@@ -110,3 +111,24 @@ parseExpression = do
   case op of
     Nothing -> return g
     (Just h) -> return h
+
+-- operators, function compositions ...
+parseExpression :: Parser Lib.Function
+parseExpression = do
+  subExpr <- parseSubExpression 
+
+  case subExpr of
+    (Just g) -> parseOpOperand g
+
+    Nothing -> do
+      f <- parseFunction
+      args <- parseSubExpression
+
+      let g = case args of
+                Nothing -> f
+                (Just g) -> Lib.compose f g
+
+      parseOpOperand g
+
+parseSubExpression :: Parser (Maybe Lib.Function)
+parseSubExpression = optional (char '(' *> parseExpression <* char ')')

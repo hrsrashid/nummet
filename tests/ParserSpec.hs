@@ -77,6 +77,9 @@ suite = do
     it "exp" $
       parse parseFunction "exp" `shouldBe` Right fExp
 
+    it "power" $
+      parse parseExpression "cos(x0)^x1" `shouldBe` Right (Lib.Function "cos(x0)^x1" (\v -> Right $ cos (v Vec.! 0) ** (v Vec.! 1)))
+
     it "composition sin(x0)" $
       parse parseExpression "sin(x0)" `shouldBe` Right fSin
 
@@ -91,6 +94,14 @@ suite = do
 
     it "with different vars" $
       parse parseExpression "x0*x1*x2" `shouldBe` Right (Lib.Function "x0*x1*x2" (\v -> Right $ v Vec.! 0 * v Vec.! 1 * v Vec.! 2))
+
+    it "with multiple ( and )" $ do
+      let expr = "(x0-(x1*x2))+sin((x0*x1)-(x0-x1))"
+      parse parseExpression expr `shouldBe` Right (Lib.Function expr (\v -> let
+          x0 = v Vec.! 0
+          x1 = v Vec.! 1
+          x2 = v Vec.! 2 
+        in Right $ (x0 - (x1*x2)) + sin ((x0*x1) - (x0 - x1)) ))
 
   
   describe "Parsing vector" $ do

@@ -10,7 +10,7 @@ System of linear algebraic equations - Gaussian elimination with selection of pi
 ## Task 2
 Function approximation. Newton bivariate polynomial interpolation.
 
-## TODO: Task 3
+## Task 3
 System of nonlinear algebraic equations - Picard's method (1 root)
 
 ## TODO: Task ..

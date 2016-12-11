@@ -1,9 +1,10 @@
 # example of input data
+
+# first approximation
+1 1 1
+
 # linear coefficients | vector of non-linear functions
 
 1 2 4 sin(x0)+log(x1+1)
 0 3 5 x2*x1
 2 1 9 0
-
-# 1  1  x0*x1-5
-# 2  3  x0*x0-11

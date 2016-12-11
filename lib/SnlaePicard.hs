@@ -8,15 +8,12 @@ import qualified Data.Matrix.Generic as DMG (fromList)
 import Library
 import qualified SlaeGauss as SG
 
-compute :: FMatrix -> Either ComputeError Vector
-compute fm = go 0 Nothing xs0
+compute :: (Vector, FMatrix) -> Either ComputeError Vector
+compute (xs0, fm) = go 0 Nothing xs0
   where
-    xs0 = Vec.fromList $ replicate (Mx.rows fm) 1
-
     go :: Int -> Maybe Double -> Vector -> Either ComputeError Vector
     go iters d0 xs
-      | iters >= 5 = Right xs
-      | converges = xs'
+      | converged || iters >= 1000 = Right xs
       | diverges = Left (Divergence iters)
       | otherwise = go (iters + 1) (either (const Nothing) Just d) =<< xs'
       where
@@ -25,11 +22,11 @@ compute fm = go 0 Nothing xs0
 
         diverges = case d of
                       Left _ -> False
-                      Right d' -> d' - fromMaybe d' d0 > 1e+6
+                      Right d' -> d' - fromMaybe d' d0 > 1e+10
 
-        converges = case d of
+        converged = case d of
                       Left _ -> False
-                      Right d' -> d' - fromMaybe 0 d0 < 1e-2
+                      Right d' -> d' == 0
 
         manhattanDistance v1 v2 = Vec.sum $ Vec.map abs $ Vec.zipWith (-) v1 v2
 

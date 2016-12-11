@@ -1,7 +1,7 @@
 module TestLib where
 
-import Numeric
 import Library
+import Stringify
 
 
 data ComparableReal = CReal Double
@@ -10,7 +10,7 @@ instance Eq ComparableReal where
   (CReal x) == (CReal y) = nearZero $ abs (x - y)
 
 instance Show ComparableReal where
-  show (CReal x) = showFFloat (Just 2) x ""
+  show (CReal x) = stringify x
 
 
 toCReal :: Functor a => a (a Double) -> a (a ComparableReal)

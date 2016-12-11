@@ -42,7 +42,7 @@ instance Show ComputeError where
   show NoAlgorithm = "No such algorithm found."
   show SingularMatrix = "Matrix is singular (degenerate, invertible)."
   show (Divergence i) = "Unable to compute, algorithm diverges (" ++ show i ++ " iterations)"
-  show (ArgumentOutOfRange s) = "Argument to function out of range: " ++ s
+  show (ArgumentOutOfRange s) = "Argument of function is out of range: " ++ s
   show (Bunch errs) = intercalate "\n" $ map show errs
 
 nearZero :: Double -> Bool

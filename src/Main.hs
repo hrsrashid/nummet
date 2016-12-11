@@ -24,7 +24,10 @@ main = do
 
 
 scalarMatrix = parseInput $ parseMatrix parseDecimal
-funcMatrix = parseInput $ parseMatrix parseExpression
+vectorAndFuncMatrix = do
+  v <- parseInput $ parseVector parseDecimal
+  fm <- parseInput $ parseMatrix parseExpression
+  return (v, fm)
 
 
 launch :: MonadIO m => String -> String -> m (Either String String)
@@ -33,7 +36,7 @@ launch "slae" input = do
   return $ stringify <$> (first show . SG.compute =<< inData)
 
 launch "snlae" input = do
-  inData <- parseFile funcMatrix input
+  inData <- parseFile vectorAndFuncMatrix input
   return $ stringify <$> (first show . SP.compute =<< inData)
   
 launch "interpolate" input = do
