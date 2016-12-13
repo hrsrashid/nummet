@@ -56,6 +56,7 @@ parseFunction = choice
   , parseLog
   , parseExp
   , parseSqrt
+  , parseAbs
   ]
 
 parseConst :: Parser Lib.Function
@@ -83,6 +84,9 @@ parseSqrt = string "sqrt" >> pure (Lib.simpleFunc "sqrt" (\x -> if x >= 0 then R
 
 parseExp :: Parser Lib.Function
 parseExp = string "exp" >> pure (Lib.simpleFunc "exp" $ Right . exp)
+
+parseAbs :: Parser Lib.Function
+parseAbs = string "abs" >> pure (Lib.simpleFunc "abs" $ Right . abs)
 
 
 operators = "+-*/^"
