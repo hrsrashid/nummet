@@ -14,6 +14,6 @@ Function approximation. Newton bivariate polynomial interpolation.
 System of nonlinear algebraic equations - Picard's method (1 root)
 
 ## TODO: Task 4
-Integration. Rectangular rule (1st order).
+Integration. Rectangular rule (end point).
 
 ## TODO: Task ..
