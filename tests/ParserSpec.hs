@@ -62,6 +62,9 @@ suite = do
     it "constant" $
       parse parseFunction "345" `shouldBe` Right (Lib.Function "345" (const $ Right 345))
 
+    it "x" $
+      parse parseFunction "x" `shouldBe` Right (Lib.Function "x0" $ Right . (Vec.! 0))
+
     it "x1" $
       parse parseFunction "x1" `shouldBe` Right (Lib.Function "x1" $ Right . (Vec.! 1))
 

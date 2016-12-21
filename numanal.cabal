@@ -28,6 +28,7 @@ library
                      , Parser
                      , Stringify
                      , SnlaePicard
+                     , RectIntegral
   build-depends:       base
                      , scientific
                      , numbers
@@ -45,6 +46,7 @@ test-suite numanal-test
                      , SlaeGaussSpec
                      , SnlaePicardSpec
                      , BivarInterpolNewtonSpec
+                     , RectIntegralSpec
   hs-source-dirs:      tests
   build-depends:       base
                      , numanal

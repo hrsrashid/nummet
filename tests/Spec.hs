@@ -5,6 +5,7 @@ import           ParserSpec              as PS
 import           SlaeGaussSpec           as SGS
 import           SnlaePicardSpec         as SPS
 import           StringifySpec           as SS
+import           RectIntegralSpec        as RIS
 import           Test.Hspec
 
 
@@ -15,3 +16,4 @@ main = hspec $ do
   SGS.suite
   BINS.suite
   SPS.suite
+  RIS.suite

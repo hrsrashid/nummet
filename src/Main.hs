@@ -11,6 +11,7 @@ import           Library
 import qualified SlaeGauss as SG
 import qualified BivarInterpolNewton as BIN
 import qualified SnlaePicard as SP
+import qualified RectIntegral as RI
 
 
 main :: IO ()
@@ -28,6 +29,10 @@ vectorAndFuncMatrix = do
   v <- parseInput $ parseVector parseDecimal
   fm <- parseInput $ parseMatrix parseExpression
   return (v, fm)
+vectorAndFunc = do
+  f <- parseInput $ parseExpression
+  v <- parseInput $ parseVector parseDecimal
+  return (v, f)
 
 
 launch :: MonadIO m => String -> String -> m (Either String String)
@@ -42,6 +47,10 @@ launch "snlae" input = do
 launch "interpolate" input = do
   inData <- parseFile scalarMatrix input
   return $ stringify . BIN.compute <$> inData
+
+launch "int" input = do
+  inData <- parseFile vectorAndFunc input
+  return $ stringify . RI.compute <$> inData
 
 launch _ _ = return $ Left $ show NoAlgorithm
 
@@ -65,6 +74,7 @@ cliHelp = do
        ++     "\tslae\t\tSolve SLAE by Gaussian elimination\n"
        ++     "\tsnlae\t\tSolve SNLAE using Picard method\n"
        ++     "\tinterpolate\tNewton bivariate polynomial interpolation\n"
+       ++     "\tint\t\tDefinite integral. Rectangular rule.\n"
        ++ "\n"
        ++ "INPUT\tfilename of input data\n"
        ++ "OUTPUT\tfilename for ouput data\n"

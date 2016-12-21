@@ -2,6 +2,8 @@ module Parser where
 
 import           Control.Applicative
 import           Control.Monad.IO.Class
+import qualified Control.Monad             as M (join)
+import           Data.Maybe (fromMaybe)
 import qualified Data.List                 as L
 import           Data.Matrix.Dense.Generic
 import qualified Data.Scientific           as Sci
@@ -67,7 +69,9 @@ parseConst = do
 parseX :: Parser Lib.Function
 parseX = runUnspaced $ do
   char 'x'
-  index <- natural
+  maybeIndex <- optional natural
+  let index = fromMaybe 0 maybeIndex
+
   return $ Lib.Function ("x" L.++ show index) $ Right . (Data.Vector.! fromIntegral index)
 
 parseSin :: Parser Lib.Function
@@ -91,7 +95,7 @@ parseAbs = string "abs" >> pure (Lib.simpleFunc "abs" $ Right . abs)
 
 operators = "+-*/^"
 
-type Operator = Double -> Double -> Double
+type Operator = Double -> Double -> Either Lib.ComputeError Double
 
 parseOperator :: Parser (String, Operator)
 parseOperator = do
@@ -99,18 +103,21 @@ parseOperator = do
   return
     $ (,) (show op)
     $ case op of
-        '+' -> (+)
-        '-' -> (-)
-        '*' -> (*)
-        '/' -> (/)
-        '^' -> (**)
+        '+' -> \x y -> Right (x + y)
+        '-' -> \x y -> Right (x - y)
+        '*' -> \x y -> Right (x * y)
+        '/' -> \x y -> if Lib.nearZero y then Left (Lib.ArgumentOutOfRange "Division by zero") else Right (x / y)
+        '^' -> \x y -> Right (x ** y)
 
 parseOpOperand :: Lib.Function -> Parser Lib.Function
 parseOpOperand g = do
   op <- optional $ do
     (sop, op) <- parseOperator
     h <- parseExpression
-    return $ Lib.Function (show g L.++ sop L.++ show h) $ \x -> op <$> Lib.runFunction g x <*> Lib.runFunction h x
+    
+    return
+      $ Lib.Function (show g L.++ sop L.++ show h)
+      $ \x -> M.join $ op <$> Lib.runFunction g x <*> Lib.runFunction h x
 
   case op of
     Nothing -> return g
