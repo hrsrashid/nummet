@@ -46,4 +46,6 @@ instance Show ComputeError where
   show (Bunch errs) = intercalate "\n" $ map show errs
 
 nearZero :: Double -> Bool
-nearZero x = abs x < 1e-7
+nearZero x = abs x < epsilon
+
+epsilon = 1e-5

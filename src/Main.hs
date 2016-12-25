@@ -30,7 +30,7 @@ vectorAndFuncMatrix = do
   fm <- parseInput $ parseMatrix parseExpression
   return (v, fm)
 vectorAndFunc = do
-  f <- parseInput $ parseExpression
+  f <- parseInput parseExpression
   v <- parseInput $ parseVector parseDecimal
   return (v, f)
 
