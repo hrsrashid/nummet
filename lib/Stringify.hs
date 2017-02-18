@@ -11,7 +11,7 @@ class Stringifiable a where
   stringify _ = "Failed to stringify unknown object"
 
 instance Stringifiable Double where
-  stringify x = showFFloat (Just 2) x ""
+  stringify = show
 
 instance Stringifiable a => Stringifiable (Vec.Vector a) where
   stringify = intercalate "\t" . Vec.toList . fmap stringify

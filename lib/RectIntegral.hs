@@ -32,7 +32,7 @@ compute (v, f) = sum $ map (go dx Nothing) [1 .. n]
       let
         values = partitionEithers 
           $ map (runFunction f . V.fromList . (:[])) xs
-      in if length (fst values) > 0
+      in if not (null (fst values))
           then errorWithoutStackTrace "Failed: Function is discontinuous on the interval."
           else snd values
 

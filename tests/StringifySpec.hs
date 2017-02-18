@@ -10,8 +10,8 @@ suite :: SpecWith ()
 suite =
   describe "Stringification" $ do
     it "of vector" $
-      stringify (Vec.fromList [1, 2, 3.5 :: Double]) `shouldBe` "1.00\t2.00\t3.50"
+      stringify (Vec.fromList [1, 2, 3.5 :: Double]) `shouldBe` "1.0\t2.0\t3.5"
 
     it "of matrix" $
       stringify (Mx.matrix 3 [1..9] :: Mx.Matrix Double)
-        `shouldBe` "1.00\t2.00\t3.00\n4.00\t5.00\t6.00\n7.00\t8.00\t9.00"
+        `shouldBe` "1.0\t2.0\t3.0\n4.0\t5.0\t6.0\n7.0\t8.0\t9.0"
