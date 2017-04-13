@@ -18,3 +18,6 @@ instance Stringifiable a => Stringifiable (Vec.Vector a) where
 
 instance (Stringifiable (v a), VecG.Vector v a) => Stringifiable (Mx.Matrix v a) where
   stringify = intercalate "\n" . fmap stringify . Mx.toRows
+
+instance (Stringifiable a, Stringifiable b) => Stringifiable (a, b) where
+  stringify (a, b) = stringify a ++ "; " ++ stringify b

@@ -12,6 +12,7 @@ import qualified SlaeGauss as SG
 import qualified BivarInterpolNewton as BIN
 import qualified SnlaePicard as SP
 import qualified RectIntegral as RI
+import qualified EigenPower as EP
 
 
 main :: IO ()
@@ -52,6 +53,10 @@ launch "int" input = do
   inData <- parseFile vectorAndFunc input
   return $ stringify . RI.compute <$> inData
 
+launch "eigen" input = do
+  inData <- parseFile scalarMatrix input
+  return $ stringify <$> (first show . EP.compute =<< inData)
+
 launch _ _ = return $ Left $ show NoAlgorithm
 
 
@@ -75,6 +80,7 @@ cliHelp = do
        ++     "\tsnlae\t\tSolve SNLAE using Picard method\n"
        ++     "\tinterpolate\tNewton bivariate polynomial interpolation\n"
        ++     "\tint\t\tDefinite integral. Rectangular rule.\n"
+       ++     "\teigen\t\tEigenpair. Power method.\n"
        ++ "\n"
        ++ "INPUT\tfilename of input data\n"
        ++ "OUTPUT\tfilename for ouput data\n"

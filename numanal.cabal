@@ -29,6 +29,7 @@ library
                      , Stringify
                      , SnlaePicard
                      , RectIntegral
+                     , EigenPower
   build-depends:       base
                      , scientific
                      , numbers
@@ -47,6 +48,7 @@ test-suite numanal-test
                      , SnlaePicardSpec
                      , BivarInterpolNewtonSpec
                      , RectIntegralSpec
+                     , EigenPowerSpec
   hs-source-dirs:      tests
   build-depends:       base
                      , numanal

@@ -6,6 +6,7 @@ import           SlaeGaussSpec           as SGS
 import           SnlaePicardSpec         as SPS
 import           StringifySpec           as SS
 import           RectIntegralSpec        as RIS
+import           EigenPowerSpec          as EPS
 import           Test.Hspec
 
 
@@ -17,3 +18,4 @@ main = hspec $ do
   BINS.suite
   SPS.suite
   RIS.suite
+  EPS.suite
