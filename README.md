@@ -16,7 +16,7 @@ System of nonlinear algebraic equations - Picard's method (1 root)
 ## Task 4
 Integration. Rectangular rule (end point).
 
-## TODO: Task 5
+## Task 5
 Eigenpairs. Power method. Dominant eigenvalue.
 
 ## TODO: Task 6

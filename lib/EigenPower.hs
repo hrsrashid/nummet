@@ -2,6 +2,21 @@ module EigenPower where
 
 import           Library
 import qualified Data.Vector as V
+import qualified Data.Matrix as M
 
-compute :: Matrix -> Either ComputeError (Double, Vector)
-compute _ = Right (-2, V.fromList [0, 1])
+compute :: Matrix -> (Double, Vector)
+compute m = go (V.replicate (M.rows m) 0.0) (V.fromList [1 .. fromIntegral $ M.rows m])
+  where
+    go l y
+      | converges l next_l = (avg next_l, next_x)
+      | otherwise = go next_l next_y
+      where
+        x = toLInftyNormUnit y
+        next_y = m `mulMxByVec` x
+        next_x = toLInftyNormUnit next_y
+        next_l = V.imap (\i (a,b) -> if nearZero b then l V.! i else a/b) $ V.zip next_y x
+
+        converges l1 l2 = V.all nearZero $ V.zipWith (-) l1 l2
+        avg v =
+          let v' = V.filter (not . nearZero) v
+          in if V.null v' then 0.0 else V.sum v' / fromIntegral (V.length v')

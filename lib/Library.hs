@@ -1,6 +1,7 @@
 module Library where
 
 import Data.List (intercalate)
+import Data.Ord (comparing)
 import qualified Data.Matrix       as Mx
 import qualified Data.Vector       as Vec
 
@@ -49,3 +50,12 @@ nearZero :: Double -> Bool
 nearZero x = abs x < epsilon
 
 epsilon = 1e-5
+
+lInftyNorm :: Vector -> Double
+lInftyNorm = Vec.maximumBy (comparing abs)
+
+toLInftyNormUnit :: Vector -> Vector
+toLInftyNormUnit v = Vec.map (/lInftyNorm v) v
+
+mulMxByVec :: Matrix -> Vector -> Vector
+mulMxByVec m v = Vec.fromList $ map (Vec.sum . Vec.zipWith (*) v) (Mx.toRows m)

@@ -55,7 +55,7 @@ launch "int" input = do
 
 launch "eigen" input = do
   inData <- parseFile scalarMatrix input
-  return $ stringify <$> (first show . EP.compute =<< inData)
+  return $ stringify <$> EP.compute <$> inData
 
 launch _ _ = return $ Left $ show NoAlgorithm
 

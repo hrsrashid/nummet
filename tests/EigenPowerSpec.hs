@@ -12,7 +12,7 @@ import qualified EigenPower
 suite :: SpecWith ()
 suite =
   describe "EigenPower" $ do
-    let compute = fmap (bimap CReal (fmap CReal)) . fmap (fmap Vec.toList) . EigenPower.compute . Mx.fromLists
+    let compute = bimap CReal (fmap CReal) . fmap Vec.toList . EigenPower.compute . Mx.fromLists
 
-    it "finds eigenpair for {{1, 0}, {0, -2}}" $
-      compute [[1, 0], [0, -2]] `shouldBe` Right (CReal (-2), CReal <$> [0, 1])
+    it "finds eigenpair for {{0.8, 0.3}, {0.2, 0.7}}" $
+      compute [[0.8, 0.3], [0.2, 0.7]] `shouldBe` (CReal 1, CReal <$> [1, 2/3])

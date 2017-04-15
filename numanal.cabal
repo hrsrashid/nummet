@@ -49,6 +49,7 @@ test-suite numanal-test
                      , BivarInterpolNewtonSpec
                      , RectIntegralSpec
                      , EigenPowerSpec
+                     , LibrarySpec
   hs-source-dirs:      tests
   build-depends:       base
                      , numanal
