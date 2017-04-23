@@ -1,11 +1,21 @@
 module EigenPower where
 
 import           Library
+import           Data.Bifunctor (first)
 import qualified Data.Vector as V
 import qualified Data.Matrix as M
 
 compute :: Matrix -> (Double, Vector)
-compute m = go (V.replicate (M.rows m) 0.0) (V.fromList [1 .. fromIntegral $ M.rows m])
+compute m =
+    first (+dominant_l)
+  $ computeDominantPair
+  $ M.zipWith (-) m (M.diag (take (M.rows m) (repeat dominant_l)))
+  where
+    (dominant_l, _) = computeDominantPair m
+
+
+computeDominantPair :: Matrix -> (Double, Vector)
+computeDominantPair m = go (V.replicate (M.rows m) 0.0) (V.fromList [1 .. fromIntegral $ M.rows m])
   where
     go l y
       | converges l next_l = (avg next_l, next_x)

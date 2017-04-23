@@ -19,7 +19,7 @@ Integration. Rectangular rule (end point).
 ## Task 5
 Eigenpairs. Power method. Dominant eigenvalue.
 
-## TODO: Task 6
+## Task 6
 Eigenpairs. Power method. Smallest eigenvalue.
 
 ## TODO: Task ..
