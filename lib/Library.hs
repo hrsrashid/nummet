@@ -52,7 +52,7 @@ nearZero x = abs x < epsilon
 epsilon = 1e-5
 
 lInftyNorm :: Vector -> Double
-lInftyNorm = Vec.maximumBy (comparing abs)
+lInftyNorm = abs . Vec.maximumBy (comparing abs)
 
 toLInftyNormUnit :: Vector -> Vector
 toLInftyNormUnit v = Vec.map (/lInftyNorm v) v
