@@ -2,6 +2,7 @@ module Library where
 
 import Data.List (intercalate)
 import Data.Ord (comparing)
+import Control.Monad (liftM2, (<=<))
 import qualified Data.Matrix       as Mx
 import qualified Data.Vector       as Vec
 
@@ -24,6 +25,14 @@ instance Eq Function where
     $ foldr (\a acc -> (&&) <$> a <*> acc) (Right True)
     $ zipWith (\x y -> (==) <$> x <*> y) (map f args) (map g args)
     where args = Vec.fromList <$> [[1, 10 .. 100] | x <- [1..10]]
+
+instance Num Function where
+  f + g = concat ["(", showFunction f, "+", showFunction g, ")"] `Function` (\x -> liftM2 (+) (runFunction f x) (runFunction g x))
+  f * g = concat ["(", showFunction f, "*", showFunction g, ")"] `Function` (\x -> liftM2 (*) (runFunction f x) (runFunction g x))
+  negate f = concat ["-", "(", showFunction f, ")"] `Function` (return . negate <=< runFunction f)
+  abs f = compose (simpleFunc "abs" $ Right . abs) f
+  signum f = compose (simpleFunc "signum" $ Right . signum) f
+  fromInteger x = simpleFunc (show x) (Right . const (fromInteger x))
 
 compose :: Function -> Function -> Function
 compose f g = Function (show f ++ "(" ++ show g ++ ")") (\v -> runFunction f =<< (Vec.fromList . (: []) <$> runFunction g v))

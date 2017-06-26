@@ -30,6 +30,7 @@ library
                      , SnlaePicard
                      , RectIntegral
                      , EigenPower
+                     , SodeRungeKutta
   build-depends:       base
                      , scientific
                      , numbers
@@ -50,6 +51,7 @@ test-suite numanal-test
                      , RectIntegralSpec
                      , EigenPowerSpec
                      , LibrarySpec
+                     , SodeRungeKuttaSpec
   hs-source-dirs:      tests
   build-depends:       base
                      , numanal
