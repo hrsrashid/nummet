@@ -2,6 +2,7 @@ module Library where
 
 import Data.List (intercalate)
 import Data.Ord (comparing)
+import Data.Functor.Classes (liftEq2)
 import Control.Monad (liftM2, (<=<))
 import qualified Data.Matrix       as Mx
 import qualified Data.Vector       as Vec
@@ -20,11 +21,8 @@ instance Show Function where
   show = showFunction
 
 instance Eq Function where
-  Function _ f == Function _ g =
-      either (const False) id 
-    $ foldr (\a acc -> (&&) <$> a <*> acc) (Right True)
-    $ zipWith (\x y -> (==) <$> x <*> y) (map f args) (map g args)
-    where args = Vec.fromList <$> [[1, 10 .. 100] | x <- [1..10]]
+  Function _ f == Function _ g = and $ zipWith (liftEq2 (==) closeTo) (map f args) (map g args)
+    where args = Vec.fromList <$> [[x, x + 10 .. x + 100] | x <- [1, 10 .. 100]]
 
 instance Num Function where
   f + g = concat ["(", showFunction f, "+", showFunction g, ")"] `Function` (\x -> liftM2 (+) (runFunction f x) (runFunction g x))
@@ -33,6 +31,16 @@ instance Num Function where
   abs f = compose (simpleFunc "abs" $ Right . abs) f
   signum f = compose (simpleFunc "signum" $ Right . signum) f
   fromInteger x = simpleFunc (show x) (Right . const (fromInteger x))
+
+instance Fractional Function where
+  f / g = concat ["(", showFunction f, "/", showFunction g, ")"] `Function` (\x -> do
+            denominator <- runFunction g x
+            numerator <- runFunction f x
+            if nearZero denominator
+            then Left $ ArgumentOutOfRange "Division by zero"
+            else return $ numerator / denominator
+          )
+  fromRational x = simpleFunc (show x) (Right . const (fromRational x))
 
 compose :: Function -> Function -> Function
 compose f g = Function (show f ++ "(" ++ show g ++ ")") (\v -> runFunction f =<< (Vec.fromList . (: []) <$> runFunction g v))
@@ -54,6 +62,10 @@ instance Show ComputeError where
   show (Divergence i) = "Unable to compute, algorithm diverges (" ++ show i ++ " iterations)"
   show (ArgumentOutOfRange s) = "Argument of function is out of range: " ++ s
   show (Bunch errs) = intercalate "\n" $ map show errs
+
+
+closeTo :: Double -> Double -> Bool
+closeTo = (nearZero .) . (-)
 
 nearZero :: Double -> Bool
 nearZero x = abs x < epsilon
