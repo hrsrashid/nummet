@@ -8,6 +8,7 @@ import           StringifySpec           as SS
 import           RectIntegralSpec        as RIS
 import           EigenPowerSpec          as EPS
 import           LibrarySpec             as LS
+import           SodeRungeKuttaSpec      as SRKS
 import           Test.Hspec
 
 
@@ -21,3 +22,4 @@ main = hspec $ do
   SPS.suite
   RIS.suite
   EPS.suite
+  SRKS.suite

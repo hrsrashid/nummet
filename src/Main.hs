@@ -26,9 +26,10 @@ main = do
 
 
 scalarMatrix = parseInput $ parseMatrix parseDecimal
+funcMatrix = parseInput $ parseMatrix parseExpression
 vectorAndFuncMatrix = do
   v <- parseInput $ parseVector parseDecimal
-  fm <- parseInput $ parseMatrix parseExpression
+  fm <- funcMatrix
   return (v, fm)
 vectorAndFunc = do
   f <- parseInput parseExpression

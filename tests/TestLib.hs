@@ -7,7 +7,7 @@ import Stringify
 data ComparableReal = CReal Double
 
 instance Eq ComparableReal where
-  (CReal x) == (CReal y) = nearZero $ abs (x - y)
+  (CReal x) == (CReal y) = closeTo x y
 
 instance Show ComparableReal where
   show (CReal x) = stringify x

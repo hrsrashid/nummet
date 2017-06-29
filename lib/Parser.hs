@@ -40,11 +40,14 @@ parseDecimal = fmap (either fromInteger Sci.toRealFloat) $ runUnspaced $ do
   _ <- many (oneOf space')
   integerOrScientific
 
+parseList :: Parser a -> Parser [a]
+parseList p = p `sepEndBy1` some (oneOf eol)
+
 parseVector :: Parser a -> Parser (Vector a)
 parseVector p = fromList <$> p `sepEndBy1` some (oneOf space')
 
 parseVectors :: Parser a -> Parser [Vector a]
-parseVectors p = parseVector p `sepEndBy1` some (oneOf eol)
+parseVectors = parseList . parseVector
 
 parseMatrix :: Parser a -> Parser (Matrix Vector a)
 parseMatrix p = fromRows <$> parseVectors p

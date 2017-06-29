@@ -106,6 +106,11 @@ suite = do
           x2 = v Vec.! 2 
         in Right $ (x0 - (x1*x2)) + sin ((x0*x1) - (x0 - x1)) ))
 
+  describe "Parsing list" $ do
+    let parse p s = toEither (parseString (parseList p) mempty s)
+
+    it "of ints" $
+      parse parseDecimal "1\n2\r3\n\r4\n" `shouldBe` Right [1, 2, 3, 4]
   
   describe "Parsing vector" $ do
     let parse p s = Vec.toList <$> toEither (parseString (parseVector p) mempty s)

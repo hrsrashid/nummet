@@ -45,6 +45,14 @@ instance Fractional Function where
 compose :: Function -> Function -> Function
 compose f g = Function (show f ++ "(" ++ show g ++ ")") (\v -> runFunction f =<< (Vec.fromList . (: []) <$> runFunction g v))
 
+compose2 :: Function -> Function -> Function -> Function
+compose2 f g h = Function (show f ++ "(" ++ show g ++ "," ++ show h ++ ")") (\v ->
+  runFunction f =<< (do
+    gv <- runFunction g v
+    hv <- runFunction h v
+    return $ Vec.fromList [gv, hv]
+  ))
+
 simpleFunc :: String -> (Double -> Either ComputeError Double) -> Function
 simpleFunc s f = Function s $ f . (Vec.! 0)
 
