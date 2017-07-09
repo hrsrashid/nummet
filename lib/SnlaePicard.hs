@@ -1,12 +1,13 @@
 module SnlaePicard where
 
-import Data.Maybe
-import Data.Either (partitionEithers)
-import qualified Data.Vector as Vec
-import qualified Data.Matrix as Mx
+import           Data.Either         (partitionEithers)
+import qualified Data.Matrix         as Mx
 import qualified Data.Matrix.Generic as DMG (fromList)
-import Library
-import qualified SlaeGauss as SG
+import           Data.Maybe
+import qualified Data.Vector         as Vec
+import           Function
+import           Library
+import qualified SlaeGauss           as SG
 
 compute :: (Vector, FMatrix) -> Either ComputeError Vector
 compute (xs0, fm) = go 0 Nothing xs0
@@ -21,11 +22,11 @@ compute (xs0, fm) = go 0 Nothing xs0
         d = manhattanDistance xs <$> xs'
 
         diverges = case d of
-                      Left _ -> False
+                      Left _   -> False
                       Right d' -> d' - fromMaybe d' d0 > 1e+10
 
         converged = case d of
-                      Left _ -> False
+                      Left _   -> False
                       Right d' -> d' == 0
 
         manhattanDistance v1 v2 = Vec.sum $ Vec.map abs $ Vec.zipWith (-) v1 v2
@@ -36,7 +37,7 @@ compute (xs0, fm) = go 0 Nothing xs0
       else Left (Bunch errs)
       where
         (errs, ys) = partitionEithers $ Mx.toList $ Mx.map (`runFunction` xs) fm
-         
+
 
     mapLastCol :: (Double -> Double) -> (Int, Int) -> Double -> Double
     mapLastCol f (_, j) a

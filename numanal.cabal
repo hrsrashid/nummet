@@ -25,6 +25,7 @@ library
   exposed-modules:     SlaeGauss
                      , BivarInterpolNewton
                      , Library
+                     , Function
                      , Parser
                      , Stringify
                      , SnlaePicard
@@ -51,6 +52,7 @@ test-suite numanal-test
                      , RectIntegralSpec
                      , EigenPowerSpec
                      , LibrarySpec
+                     , FunctionSpec
                      , SodeRungeKuttaSpec
   hs-source-dirs:      tests
   build-depends:       base

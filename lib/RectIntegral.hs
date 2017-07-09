@@ -1,9 +1,10 @@
 module RectIntegral where
 
-import Data.Either (partitionEithers)
-import Data.Maybe (fromMaybe)
+import           Data.Either (partitionEithers)
+import           Data.Maybe  (fromMaybe)
 import qualified Data.Vector as V
-import Library
+import           Function
+import           Library
 
 
 compute :: (Vector, Function) -> Double
@@ -17,7 +18,7 @@ compute (v, f) = sum $ map (go dx Nothing) [1 .. n]
         int_h_i = integr h i
         err = abs $ int_h_i - fromMaybe (integr (2*h) i) int_2h_i
         acceptable = err * (xn - x0) / h <= epsilon
-  
+
     n = 500
     x0 = V.head v
     xn = V.last v
@@ -30,7 +31,7 @@ compute (v, f) = sum $ map (go dx Nothing) [1 .. n]
 
     ys xs =
       let
-        values = partitionEithers 
+        values = partitionEithers
           $ map (runFunction f . V.fromList . (:[])) xs
       in if not (null (fst values))
           then errorWithoutStackTrace "Failed: Function is discontinuous on the interval."

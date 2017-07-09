@@ -1,60 +1,13 @@
 module Library where
 
-import Data.List (intercalate)
-import Data.Ord (comparing)
-import Data.Functor.Classes (liftEq2)
-import Control.Monad (liftM2, (<=<))
-import qualified Data.Matrix       as Mx
-import qualified Data.Vector       as Vec
+import           Data.List   (intercalate)
+import qualified Data.Matrix as Mx
+import           Data.Ord    (comparing)
+import qualified Data.Vector as Vec
 
 type Matrix = Mx.Matrix Double
-type FMatrix = Mx.Matrix Function
 type Vector = Vec.Vector Double
 type Permutations = Vec.Vector Int
-
-data Function = Function
-  { showFunction :: String
-  , runFunction :: Vector -> Either ComputeError Double
-  }
-
-instance Show Function where
-  show = showFunction
-
-instance Eq Function where
-  Function _ f == Function _ g = and $ zipWith (liftEq2 (==) closeTo) (map f args) (map g args)
-    where args = Vec.fromList <$> [[x, x + 10 .. x + 100] | x <- [1, 10 .. 100]]
-
-instance Num Function where
-  f + g = concat ["(", showFunction f, "+", showFunction g, ")"] `Function` (\x -> liftM2 (+) (runFunction f x) (runFunction g x))
-  f * g = concat ["(", showFunction f, "*", showFunction g, ")"] `Function` (\x -> liftM2 (*) (runFunction f x) (runFunction g x))
-  negate f = concat ["-", "(", showFunction f, ")"] `Function` (return . negate <=< runFunction f)
-  abs f = compose (simpleFunc "abs" $ Right . abs) f
-  signum f = compose (simpleFunc "signum" $ Right . signum) f
-  fromInteger x = simpleFunc (show x) (Right . const (fromInteger x))
-
-instance Fractional Function where
-  f / g = concat ["(", showFunction f, "/", showFunction g, ")"] `Function` (\x -> do
-            denominator <- runFunction g x
-            numerator <- runFunction f x
-            if nearZero denominator
-            then Left $ ArgumentOutOfRange "Division by zero"
-            else return $ numerator / denominator
-          )
-  fromRational x = simpleFunc (show x) (Right . const (fromRational x))
-
-compose :: Function -> Function -> Function
-compose f g = Function (show f ++ "(" ++ show g ++ ")") (\v -> runFunction f =<< (Vec.fromList . (: []) <$> runFunction g v))
-
-compose2 :: Function -> Function -> Function -> Function
-compose2 f g h = Function (show f ++ "(" ++ show g ++ "," ++ show h ++ ")") (\v ->
-  runFunction f =<< (do
-    gv <- runFunction g v
-    hv <- runFunction h v
-    return $ Vec.fromList [gv, hv]
-  ))
-
-simpleFunc :: String -> (Double -> Either ComputeError Double) -> Function
-simpleFunc s f = Function s $ f . (Vec.! 0)
 
 data ComputeError =
     NoAlgorithm
@@ -88,3 +41,9 @@ toLInftyNormUnit v = Vec.map (/lInftyNorm v) v
 
 mulMxByVec :: Matrix -> Vector -> Vector
 mulMxByVec m v = Vec.fromList $ map (Vec.sum . Vec.zipWith (*) v) (Mx.toRows m)
+
+vecAddConst :: Vector -> Double -> Vector
+vecAddConst v c = Vec.map (+c) v
+
+vvZipWith :: (Double -> Double -> Double) -> Vec.Vector Vector -> Vec.Vector Vector -> Vec.Vector Vector
+vvZipWith = Vec.zipWith . Vec.zipWith

@@ -2,17 +2,17 @@ module Main where
 
 import           Control.Exception
 import           Control.Monad.IO.Class
-import           System.Environment (getArgs, getProgName)
 import           Data.Bifunctor
+import           System.Environment     (getArgs, getProgName)
 
-import           Parser
-import           Stringify
+import qualified BivarInterpolNewton    as BIN
+import qualified EigenPower             as EP
 import           Library
-import qualified SlaeGauss as SG
-import qualified BivarInterpolNewton as BIN
-import qualified SnlaePicard as SP
-import qualified RectIntegral as RI
-import qualified EigenPower as EP
+import           Parser
+import qualified RectIntegral           as RI
+import qualified SlaeGauss              as SG
+import qualified SnlaePicard            as SP
+import           Stringify
 
 
 main :: IO ()
@@ -21,7 +21,7 @@ main = do
   case args of
     [algo, input, output] -> do
       res <- launch algo input
-      report output res 
+      report output res
     _ -> cliHelp
 
 
@@ -45,7 +45,7 @@ launch "slae" input = do
 launch "snlae" input = do
   inData <- parseFile vectorAndFuncMatrix input
   return $ stringify <$> (first show . SP.compute =<< inData)
-  
+
 launch "interpolate" input = do
   inData <- parseFile scalarMatrix input
   return $ stringify . BIN.compute <$> inData

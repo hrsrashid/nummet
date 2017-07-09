@@ -1,11 +1,12 @@
 module SnlaePicardSpec where
 
-import Test.Hspec
-import Library
-import TestLib
-import qualified Data.Vector as Vec
 import qualified Data.Matrix as Mx
+import qualified Data.Vector as Vec
+import           Function
+import           Library
 import qualified SnlaePicard
+import           Test.Hspec
+import           TestLib
 
 
 suite :: SpecWith ()

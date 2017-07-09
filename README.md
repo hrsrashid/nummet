@@ -23,6 +23,6 @@ Eigenpairs. Power method. Dominant eigenvalue.
 Eigenpairs. Power method. Smallest eigenvalue.
 
 ## TODO: Task 7
-ODE system. Cauchy problem. Runge – Kutta method 3rd order.
+ODE system. Cauchy problem. Runge – Kutta method 3rd order (2nd variant).
 
 ## TODO: Task ..
