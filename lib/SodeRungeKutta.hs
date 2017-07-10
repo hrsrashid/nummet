@@ -13,14 +13,18 @@ import           Library
 -- ... ... ... ...
 
 compute :: FMatrix -> Either ComputeError Matrix
-compute fm = undefined -- go x0 y0 0
+compute fm = M.fromRows
+  <$> V.toList
+  <$> V.zipWith (\x ys -> V.cons x ys) x0
+  <$> ((\y0' -> go x0 y0' 0) =<< y0)
   where
-    -- go x_i y_i i
-    --   | i < 10 = let y_i_1 = y x_i y_i in
-    --     if V.all (==0) (V.zipWith (-) y_i y_i_1)
-    --     then y_i_1
-    --     else go x_i y_i_1 (i + 1)
-    --   | otherwise = y_i
+    go x_i y_i i
+      | i < 1000 = do
+        y_i_1 <- y x_i y_i
+        if (V.all . V.all) nearZero (vvZipWith (-) y_i y_i_1)
+        then return y_i_1
+        else go x_i y_i_1 (i + 1)
+      | otherwise = Left $ Divergence i
 
     sys_order :: Int
     sys_order = V.length f
@@ -33,7 +37,7 @@ compute fm = undefined -- go x0 y0 0
     x0 = V.fromList [1, 1 + tau .. 10]
 
     y0 :: Either ComputeError (V.Vector Vector)
-    y0 = runMeshFunctionSystem y_init $ flip V.cons V.empty <$> x0
+    y0 = vvTranspose <$> runMeshFunctionSystem y_init (flip V.cons V.empty <$> x0)
 
     y x0 y0 = do
       k1' <- k1 x0 y0
@@ -41,6 +45,6 @@ compute fm = undefined -- go x0 y0 0
       return $ (V.zipWith3 . V.zipWith3) (\k1_i_j k3_i_j y0_i_j -> tau*(k1_i_j + 3*k3_i_j)/4 + y0_i_j) k1' k3' y0
 
     k1 :: Vector -> V.Vector Vector -> Either ComputeError (V.Vector Vector)
-    k1 x y = runMeshFunctionSystem f $ V.zipWith V.cons x y
+    k1 x y = vvTranspose <$> runMeshFunctionSystem f (V.zipWith V.cons x y)
     k2 x y = k1 x y >>= k1 (vecAddConst x (tau/3)) . vvZipWith (\y_i k1_i -> y_i + tau *   k1_i / 3) y
     k3 x y = k2 x y >>= k1 (vecAddConst x (2*tau/3)) . vvZipWith (\y_i k2_i -> y_i + tau * 2*k2_i / 3) y

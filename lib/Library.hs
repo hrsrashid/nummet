@@ -47,3 +47,6 @@ vecAddConst v c = Vec.map (+c) v
 
 vvZipWith :: (Double -> Double -> Double) -> Vec.Vector Vector -> Vec.Vector Vector -> Vec.Vector Vector
 vvZipWith = Vec.zipWith . Vec.zipWith
+
+vvTranspose :: Vec.Vector Vector -> Vec.Vector Vector
+vvTranspose = Vec.fromList . Mx.toColumns . (Mx.fromRows :: [Vector] -> Matrix) . Vec.toList
