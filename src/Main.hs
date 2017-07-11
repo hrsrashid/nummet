@@ -12,6 +12,7 @@ import           Parser
 import qualified RectIntegral           as RI
 import qualified SlaeGauss              as SG
 import qualified SnlaePicard            as SP
+import qualified SodeRungeKutta         as SRK
 import           Stringify
 
 
@@ -35,6 +36,10 @@ vectorAndFunc = do
   f <- parseInput parseExpression
   v <- parseInput $ parseVector parseDecimal
   return (v, f)
+numberAndFuncMatrix = do
+  x <- parseInput parseDecimal
+  fm <- funcMatrix
+  return (x, fm)
 
 
 launch :: MonadIO m => String -> String -> m (Either String String)
@@ -57,6 +62,10 @@ launch "int" input = do
 launch "eigen" input = do
   inData <- parseFile scalarMatrix input
   return $ stringify <$> EP.compute <$> inData
+
+launch "sode" input = do
+  inData <- parseFile numberAndFuncMatrix input
+  return $ stringify <$> (first show . SRK.compute =<< inData)
 
 launch _ _ = return $ Left $ show NoAlgorithm
 
@@ -82,6 +91,7 @@ cliHelp = do
        ++     "\tinterpolate\tNewton bivariate polynomial interpolation\n"
        ++     "\tint\t\tDefinite integral. Rectangular rule.\n"
        ++     "\teigen\t\tEigenpair. Power method.\n"
+       ++     "\tsode\t\tSystems of ODE. Runge-Kutta method. 3rd order (2nd var).\n"
        ++ "\n"
        ++ "INPUT\tfilename of input data\n"
        ++ "OUTPUT\tfilename for ouput data\n"

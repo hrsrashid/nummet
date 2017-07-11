@@ -57,3 +57,6 @@ runMeshFunction = traverse . runFunction
 
 runMeshFunctionSystem :: (Traversable v, Traversable t) => v Function -> t Vector -> Either ComputeError (v (t Double))
 runMeshFunctionSystem fs xs = traverse (flip runMeshFunction xs) fs
+
+runFunctionSystem :: Traversable t => t Function -> Vector -> Either ComputeError (t Double)
+runFunctionSystem fs x = traverse (flip runFunction x) fs

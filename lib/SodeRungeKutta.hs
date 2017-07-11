@@ -5,46 +5,32 @@ import qualified Data.Vector as V
 import           Function
 import           Library
 
--- f(x,y0,y1,...,yn)
--- x  y1  y2  y3  ...
--- -- --- --- --- ---
--- x1 y11 y12 y13 ...
--- x2 y21 y22 y23 ...
--- ... ... ... ...
 
-compute :: FMatrix -> Either ComputeError Matrix
-compute fm = M.fromRows
+compute :: (Double, FMatrix) -> Either ComputeError Matrix
+compute (tau, fm) = M.fromRows
   <$> V.toList
-  <$> V.zipWith (\x ys -> V.cons x ys) x0
-  <$> ((\y0' -> go x0 y0' 0) =<< y0)
+  <$> V.zipWith V.cons xs
+  <$> sequence (V.scanl y y0s xs)
   where
-    go x_i y_i i
-      | i < 1000 = do
-        y_i_1 <- y x_i y_i
-        if (V.all . V.all) nearZero (vvZipWith (-) y_i y_i_1)
-        then return y_i_1
-        else go x_i y_i_1 (i + 1)
-      | otherwise = Left $ Divergence i
-
     sys_order :: Int
     sys_order = V.length f
 
-    tau = 0.1
     f = M.takeColumn fm 0
     y_init = M.takeColumn fm 1
 
-    x0 :: Vector
-    x0 = V.fromList [1, 1 + tau .. 10]
+    xs :: Vector
+    xs = V.fromList [0, 0 + tau .. tau * 100]
 
-    y0 :: Either ComputeError (V.Vector Vector)
-    y0 = vvTranspose <$> runMeshFunctionSystem y_init (flip V.cons V.empty <$> x0)
+    y0s :: Either ComputeError Vector
+    y0s = runFunctionSystem y_init (V.fromList [0])
 
-    y x0 y0 = do
-      k1' <- k1 x0 y0
-      k3' <- k3 x0 y0
-      return $ (V.zipWith3 . V.zipWith3) (\k1_i_j k3_i_j y0_i_j -> tau*(k1_i_j + 3*k3_i_j)/4 + y0_i_j) k1' k3' y0
+    y y0 x = do
+      y0' <- y0
+      k1' <- k1 x y0'
+      k3' <- k3 x y0'
+      return $ V.zipWith3 (\k1_i k3_i y0_i -> tau*(k1_i + 3*k3_i)/4 + y0_i) k1' k3' y0'
 
-    k1 :: Vector -> V.Vector Vector -> Either ComputeError (V.Vector Vector)
-    k1 x y = vvTranspose <$> runMeshFunctionSystem f (V.zipWith V.cons x y)
-    k2 x y = k1 x y >>= k1 (vecAddConst x (tau/3)) . vvZipWith (\y_i k1_i -> y_i + tau *   k1_i / 3) y
-    k3 x y = k2 x y >>= k1 (vecAddConst x (2*tau/3)) . vvZipWith (\y_i k2_i -> y_i + tau * 2*k2_i / 3) y
+    k1 :: Double -> Vector -> Either ComputeError Vector
+    k1 x y = runFunctionSystem f (V.cons x y)
+    k2 x y = k1 x y >>= k1 (x +   tau/3) . V.zipWith (\y_i k1_i -> y_i + tau *   k1_i / 3) y
+    k3 x y = k2 x y >>= k1 (x + 2*tau/3) . V.zipWith (\y_i k2_i -> y_i + tau * 2*k2_i / 3) y
