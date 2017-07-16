@@ -25,4 +25,8 @@ Eigenpairs. Power method. Smallest eigenvalue.
 ## Task 7
 ODE system. Cauchy problem. Runge – Kutta method 3rd order (2nd variant).
 
-## TODO: Task ..
+## TODO: Task 8
+Linear ODE system. Boundary value problem. Shooting method.
+
+## TODO: Task 9
+Heat equation. Explicit method.

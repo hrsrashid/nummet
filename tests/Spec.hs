@@ -1,6 +1,7 @@
 module Main where
 
 import           BivarInterpolNewtonSpec as BINS
+import           BodeShootingSpec        as BSS
 import           EigenPowerSpec          as EPS
 import           FunctionSpec            as FS
 import           LibrarySpec             as LS
@@ -25,3 +26,4 @@ main = hspec $ do
   RIS.suite
   EPS.suite
   SRKS.suite
+  BSS.suite

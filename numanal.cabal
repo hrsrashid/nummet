@@ -32,9 +32,9 @@ library
                      , RectIntegral
                      , EigenPower
                      , SodeRungeKutta
+                     , BodeShooting
   build-depends:       base
                      , scientific
-                     , numbers
                      , vector
                      , matrices
                      , trifecta
@@ -54,11 +54,11 @@ test-suite numanal-test
                      , LibrarySpec
                      , FunctionSpec
                      , SodeRungeKuttaSpec
+                     , BodeShootingSpec
   hs-source-dirs:      tests
   build-depends:       base
                      , numanal
                      , hspec
-                     , numbers
                      , vector
                      , matrices
                      , trifecta
