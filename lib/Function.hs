@@ -12,6 +12,7 @@ data Function = Function
   }
 
 type FMatrix = Mx.Matrix Function
+type FVector = Vec.Vector Function
 
 instance Show Function where
   show = take 100 . showFunction

@@ -1,17 +1,24 @@
-# yʺ + p(x)yʹ + q(x)y = f(x)
-# ⍺₁yʹ(a) + ⍺₂y(a) = ya
-# β₁yʹ(b) + β₂y(b) = yb
-# 
-# τ        <- grid step
-# a  b     <- bounds
-# 
-# +------+------+------+----+----+----+----+----+----+
-# | p(x) | q(x) | f(x) | ⍺₁ | ⍺₂ | ya | β₁ | β₂ | yb |
-# |  ..  |  ..  |  ..  | .. | .. | .. | .. | .. | .. |
+# linear 1st order
+# yʹ = A(x)y + f(x)
+# p * y(a) = ya
+# q * y(b) = yb
+#
+# f, p, q, y, ya, yb - vectors
+# A - matrix
 
+# τ        <- grid step
 0.01
+
+# a  b     <- bounds
 0 10
 
-x 0 0  1 1 0  1 1 0
-0 x 0  0 1 1  0 1 1
-0 0 x  1 0 1  1 0 1
+# A  | f
+x 0 0  0
+0 x 0  1
+0 0 x  x
+
+# p  | ya
+1 0 0  1
+
+# q  | yb
+1 1 1  1
