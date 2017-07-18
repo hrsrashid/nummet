@@ -1,10 +1,15 @@
 # linear 1st order
 # yʹ = A(x)y + f(x)
-# p * y(a) = ya
-# q * y(b) = yb
+# P * y(a) = ya
+# Q * y(b) = yb
 #
-# f, p, q, y, ya, yb - vectors
-# A - matrix
+# f, y, ya, yb - vectors
+# A, P, Q - matrices
+#
+# dim A = n𝚡n
+# dim P = p𝚡n
+# dim Q = m𝚡n
+# m + p = n
 
 # τ        <- grid step
 0.01
@@ -17,8 +22,9 @@ x 0 0  0
 0 x 0  1
 0 0 x  x
 
-# p  | ya
+# P  | ya
 1 0 0  1
+0 1 0  1
 
-# q  | yb
+# Q  | yb
 1 1 1  1
