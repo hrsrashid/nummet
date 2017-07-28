@@ -1,30 +1,18 @@
 # linear 1st order
-# yʹ = A(x)y + f(x)
-# P * y(a) = ya
-# Q * y(b) = yb
-#
-# f, y, ya, yb - vectors
-# A, P, Q - matrices
-#
-# dim A = n𝚡n
-# dim P = p𝚡n
-# dim Q = m𝚡n
-# m + p = n
-
-# τ        <- grid step
-0.01
+# uʹ = a(x)u + b(x)v + c(x)
+# vʹ = d(x)u + e(x)v + f(x)
+# pu(a) + qv(a) = r1
+# su(b) + tv(b) = r2
 
 # a  b     <- bounds
 0 10
 
-# A  | f
-x 0 0  0
-0 x 0  1
-0 0 x  x
+# a b c
+# d e f
+x 0 0
+0 x 0
 
-# P  | ya
-1 0 0  1
-0 1 0  1
-
-# Q  | yb
-1 1 1  1
+# p q r1
+# s t r2
+1 0 1
+0 1 22026.465794
