@@ -6,6 +6,7 @@ import           Data.Bifunctor
 import           System.Environment     (getArgs, getProgName)
 
 import qualified BivarInterpolNewton    as BIN
+import qualified BodeShooting           as BS
 import qualified EigenPower             as EP
 import           Library
 import           Parser
@@ -40,6 +41,11 @@ numberAndFuncMatrix = do
   x <- parseInput parseDecimal
   fm <- funcMatrix
   return (x, fm)
+vectorAndFuncMatrixAndMatrix = do
+  domain <- parseInput $ parseVector parseDecimal
+  fm <- funcMatrix
+  bounds <- scalarMatrix
+  return (domain, fm, bounds)
 
 
 launch :: MonadIO m => String -> String -> m (Either String String)
@@ -67,6 +73,10 @@ launch "sode" input = do
   inData <- parseFile numberAndFuncMatrix input
   return $ stringify <$> (first show . SRK.compute =<< inData)
 
+launch "bode" input = do
+  inData <- parseFile vectorAndFuncMatrixAndMatrix input
+  return $ stringify <$> (first show . BS.compute =<< inData)
+
 launch _ _ = return $ Left $ show NoAlgorithm
 
 
@@ -92,6 +102,7 @@ cliHelp = do
        ++     "\tint\t\tDefinite integral. Rectangular rule.\n"
        ++     "\teigen\t\tEigenpair. Power method.\n"
        ++     "\tsode\t\tSystems of ODE. Runge-Kutta method. 3rd order (2nd var).\n"
+       ++     "\tbode\t\tSystem of two 1st order linear ODE. Shooting method.\n"
        ++ "\n"
        ++ "INPUT\tfilename of input data\n"
        ++ "OUTPUT\tfilename for ouput data\n"
