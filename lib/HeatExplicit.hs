@@ -17,13 +17,16 @@ compute (sup_t, f, u_x_0, u_0_t, u_1_t) = M.fromVector (h_count + 1, tau_count +
     h = 1.0 / fromIntegral h_count
 
     arg :: Int -> Int -> Vector
-    arg i n = V.fromList [h * fromIntegral i, fromIntegral n * tau]
+    arg i n = V.fromList [x i, t n]
+
+    x i = h   * fromIntegral i
+    t n = tau * fromIntegral n
 
     y :: Int -> Int -> Either ComputeError Double
     y i n
-        | (fromIntegral i * h) `closeTo` 0 = runFunction u_0_t (arg i n)
-        | (fromIntegral i * h) `closeTo` 1 = runFunction u_1_t (arg i n)
-        | (fromIntegral n * tau) `closeTo` 0 = runFunction u_x_0 (arg i n)
+        | x i `closeTo` 0 = runFunction u_0_t (arg i n)
+        | x i `closeTo` 1 = runFunction u_1_t (arg i n)
+        | t n `closeTo` 0 = runFunction u_x_0 (arg i n)
         | otherwise = do
           y_i_1n <- y i (n-1)
           f_i_1n <- runFunction f $ arg i (n-1)
