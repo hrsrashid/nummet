@@ -8,6 +8,7 @@ import           System.Environment     (getArgs, getProgName)
 import qualified BivarInterpolNewton    as BIN
 import qualified BodeShooting           as BS
 import qualified EigenPower             as EP
+import qualified HeatExplicit           as HE
 import           Library
 import           Parser
 import qualified RectIntegral           as RI
@@ -29,23 +30,34 @@ main = do
 
 scalarMatrix = parseInput $ parseMatrix parseDecimal
 funcMatrix = parseInput $ parseMatrix parseExpression
+vector = parseInput $ parseVector parseDecimal
+function = parseInput parseExpression
+number = parseInput parseDecimal
 vectorAndFuncMatrix = do
-  v <- parseInput $ parseVector parseDecimal
+  v <- vector
   fm <- funcMatrix
   return (v, fm)
 vectorAndFunc = do
-  f <- parseInput parseExpression
-  v <- parseInput $ parseVector parseDecimal
+  f <- function
+  v <- vector
   return (v, f)
 numberAndFuncMatrix = do
-  x <- parseInput parseDecimal
+  x <- number
   fm <- funcMatrix
   return (x, fm)
 vectorAndFuncMatrixAndMatrix = do
-  domain <- parseInput $ parseVector parseDecimal
+  domain <- vector
   fm <- funcMatrix
   bounds <- scalarMatrix
   return (domain, fm, bounds)
+numberAnd4Funcs = do
+  x <- number
+  f1 <- function
+  f2 <- function
+  f3 <- function
+  f4 <- function
+  return (x, f1, f2, f3, f4)
+
 
 
 launch :: MonadIO m => String -> String -> m (Either String String)
@@ -77,6 +89,10 @@ launch "bode" input = do
   inData <- parseFile vectorAndFuncMatrixAndMatrix input
   return $ stringify <$> (first show . BS.compute =<< inData)
 
+launch "heat" input = do
+  inData <- parseFile numberAnd4Funcs input
+  return $ stringify <$> (first show . HE.compute =<< inData)
+
 launch _ _ = return $ Left $ show NoAlgorithm
 
 
@@ -103,6 +119,7 @@ cliHelp = do
        ++     "\teigen\t\tEigenpair. Power method.\n"
        ++     "\tsode\t\tSystems of ODE. Runge-Kutta method. 3rd order (2nd var).\n"
        ++     "\tbode\t\tSystem of two 1st order linear ODE. Shooting method.\n"
+       ++     "\theat\t\tHeat equation. Explicit method.\n"
        ++ "\n"
        ++ "INPUT\tfilename of input data\n"
        ++ "OUTPUT\tfilename for ouput data\n"

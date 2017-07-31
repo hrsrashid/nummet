@@ -33,6 +33,7 @@ library
                      , EigenPower
                      , SodeRungeKutta
                      , BodeShooting
+                     , HeatExplicit
   build-depends:       base
                      , scientific
                      , vector
@@ -55,6 +56,7 @@ test-suite numanal-test
                      , FunctionSpec
                      , SodeRungeKuttaSpec
                      , BodeShootingSpec
+                     , HeatExplicitSpec
   hs-source-dirs:      tests
   build-depends:       base
                      , numanal

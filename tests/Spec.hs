@@ -4,6 +4,7 @@ import           BivarInterpolNewtonSpec as BINS
 import           BodeShootingSpec        as BSS
 import           EigenPowerSpec          as EPS
 import           FunctionSpec            as FS
+import           HeatExplicitSpec        as HES
 import           LibrarySpec             as LS
 import           ParserSpec              as PS
 import           RectIntegralSpec        as RIS
@@ -27,3 +28,4 @@ main = hspec $ do
   EPS.suite
   SRKS.suite
   BSS.suite
+  HES.suite

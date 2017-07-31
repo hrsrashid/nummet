@@ -28,5 +28,5 @@ ODE system. Cauchy problem. Runge – Kutta method 3rd order (2nd variant).
 ## Task 8
 System of two 1st order linear ODE. Boundary value problem. Shooting method.
 
-## TODO: Task 9
+## Task 9
 Heat equation. Explicit method.
